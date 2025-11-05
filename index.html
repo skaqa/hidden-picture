@@ -165,7 +165,7 @@
         diceWrapper.addEventListener('click', () => { if (diceBag.length === 0) { diceBag = createShuffledDiceBag(); } const faceIndex = diceBag.pop(); const targetRot = rotations[faceIndex]; spinCount += 3; const spinAngle = spinCount * 360; const finalX = spinAngle + targetRot.x; const finalY = spinAngle + targetRot.y; dice.style.transform = `rotateX(${finalX}deg) rotateY(${finalY}deg)`; });
     </script>
     <script>
-        const chanceCard = document.getElementById('chanceCard'); const cardInner = chanceCard.querySelector('.card'); const cardValue = document.getElementById('cardValue'); const cardOptions = ['x2', 'x3', '+10', '+5', '/5', '-10', '-20'];
+        const chanceCard = document.getElementById('chanceCard'); const cardInner = chanceCard.querySelector('.card'); const cardValue = document.getElementById('cardValue'); const cardOptions = ['x2', 'x3', '+10', '+5', '÷5', '-10', '-20'];
         chanceCard.addEventListener('click', () => { if (cardInner.classList.contains('flipped')) { cardInner.classList.remove('flipped'); } else { const randomIndex = Math.floor(Math.random() * cardOptions.length); const randomValue = cardOptions[randomIndex]; cardValue.textContent = randomValue; cardInner.classList.add('flipped'); } });
     </script>
 </body>
