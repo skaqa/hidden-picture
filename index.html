@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hidden Picture Challenge</title>
     <style>
-        /* --- All CSS is unchanged --- */
+        /* --- Basic Styles --- */
         h1{font-family:'Comic Sans MS',sans-serif;font-size:2.5em;text-align:center;margin-top:20px;margin-bottom: 20px; text-shadow:1px 1px 3px rgba(0,0,0,0.3);}
         h1:hover{transform:scale(1.1);transition:transform .3s ease;}
         body{font-family:Arial,sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;margin:0;background:#f4f4f9 url('images/background.png') center/cover no-repeat;}
@@ -14,6 +14,8 @@
         .control-group {display: flex; flex-direction: column; align-items: center;}
         .control-group label {font-weight: bold; margin-bottom: 5px; font-family: Arial, sans-serif;}
         .control-group input[type="range"] {width: 150px;}
+        
+        /* --- Unchanged Styles --- */
         #main-row{display:flex;align-items:center;gap:30px;}
         #button-group{display:flex;gap:15px;}
         .action-button{padding:12px 25px;font-size:18px;cursor:pointer;border:none;border-radius:5px;transition:background-color .3s ease;}
@@ -25,8 +27,13 @@
         #text-overlay{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:1000;font-family:'Comic Sans MS',sans-serif;font-size:3em;font-weight:bold;color:#fff;background:rgba(0,0,0,.8);padding:20px 40px;border-radius:10px;opacity:0;transition:opacity .3s ease-in-out;pointer-events:none;text-shadow:2px 2px 4px rgba(0,0,0,.5);}
         .show-text{opacity:1 !important;}
         #image-container {position: relative; width: 400px; height: 400px; border: 5px solid #ccc; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,.2); cursor: default; background-color: black;}
+        
+        /* UPDATED: Image now has a smooth opacity transition for the blackout effect */
         #myImage {width: 100%; height: 100%; object-fit: cover; display: block; mask-repeat: no-repeat; -webkit-mask-repeat: no-repeat; transition: opacity 0.3s ease-in-out;}
+        #myImage.image-loading { opacity: 0; } /* This class now creates the blackout */
         #myImage.hidden-effect {-webkit-mask-image: none !important; mask-image: none !important;}
+        
+        /* --- Dice and Card Styles --- */
         .dice-wrapper{perspective:800px;cursor:pointer;}
         .dice{width:120px;height:120px;position:relative;transform-style:preserve-3d;transition:transform .8s cubic-bezier(.2,.85,.4,1.2);}
         .dice-face{position:absolute;width:120px;height:120px;background:#fff;border:4px solid #333;border-radius:12px;display:flex;align-items:center;justify-content:center;box-shadow:inset 0 0 15px rgba(0,0,0,.2);backface-visibility:hidden;}
@@ -38,6 +45,7 @@
 </head>
 <body>
     <h1>Hidden Picture Challenge</h1>
+
     <div id="game-area">
         <div id="controls-container">
             <div class="control-group">
@@ -57,86 +65,137 @@
             <div class="card-container" id="chanceCard"> <div class="card"> <div class="card-face card-back">?</div> <div class="card-face card-front" id="cardValue"></div> </div> </div>
         </div>
     </div>
+
     <div id="button-group">
         <button id="randomImageButton" class="action-button">New Picture</button>
         <button id="specialImageButton" class="action-button">Back To Ready</button>
     </div>
     <div id="text-overlay">NEW IMAGE</div>
 
-    <!-- Spotlight Script (Unchanged) -->
+    <!-- UPDATED Spotlight Script -->
     <script>
-        const imageToMask = document.getElementById('myImage'); const dotCountSlider = document.getElementById('dotCountSlider'); const speedSlider = document.getElementById('speedSlider'); const dotCountValue = document.getElementById('dotCountValue'); const speedValue = document.getElementById('speedValue');
+        const imageToMask = document.getElementById('myImage');
+        const dotCountSlider = document.getElementById('dotCountSlider');
+        const speedSlider = document.getElementById('speedSlider');
+        const dotCountValue = document.getElementById('dotCountValue');
+        const speedValue = document.getElementById('speedValue');
+
         const spotlightSettings = { count: parseInt(dotCountSlider.value), speed: parseFloat(speedSlider.value) };
         let spotlightInterval = null;
-        function applySpeedTransition() { const transitionValue = `mask-position ${spotlightSettings.speed}s ease-in-out, -webkit-mask-position ${spotlightSettings.speed}s ease-in-out`; imageToMask.style.transition = transitionValue; }
-        function moveSpotlights() { const containerSize = 400; const spotlightRadius = 25; const minPosition = spotlightRadius; const maxPosition = containerSize - spotlightRadius; const movementRange = maxPosition - minPosition; let positions = []; for (let i = 0; i < spotlightSettings.count; i++) { const randomX = Math.random() * movementRange + minPosition; const randomY = Math.random() * movementRange + minPosition; const maskX = randomX - spotlightRadius; const maskY = randomY - spotlightRadius; positions.push(`${maskX}px ${maskY}px`); } const positionsString = positions.join(', '); imageToMask.style.maskPosition = positionsString; imageToMask.style.webkitMaskPosition = positionsString; }
-        function startSpotlight() { if (spotlightInterval) clearInterval(spotlightInterval); const singleGradient = `radial-gradient(circle 50px, black 100%, transparent 100%)`; const singleSize = `50px 50px`; const gradients = Array(spotlightSettings.count).fill(singleGradient).join(', '); const sizes = Array(spotlightSettings.count).fill(singleSize).join(', '); imageToMask.style.maskImage = gradients; imageToMask.style.webkitMaskImage = gradients; imageToMask.style.maskSize = sizes; imageToMask.style.webkitMaskSize = sizes; applySpeedTransition(); imageToMask.classList.remove('hidden-effect'); setTimeout(moveSpotlights, 10); const intervalTime = spotlightSettings.speed * 1000 + 500; spotlightInterval = setInterval(moveSpotlights, intervalTime); }
-        function stopSpotlight() { imageToMask.classList.add('hidden-effect'); if (spotlightInterval) clearInterval(spotlightInterval); imageToMask.style.maskImage = ''; imageToMask.style.webkitMaskImage = ''; imageToMask.style.maskSize = ''; imageToMask.style.webkitMaskSize = ''; imageToMask.style.maskPosition = ''; imageToMask.style.webkitMaskPosition = ''; }
+
+        function applySpeedTransition() {
+            const transitionValue = `mask-position ${spotlightSettings.speed}s ease-in-out, -webkit-mask-position ${spotlightSettings.speed}s ease-in-out`;
+            imageToMask.style.transition = transitionValue;
+        }
+
+        function moveSpotlights() {
+            const containerSize = 400; const spotlightRadius = 25; const minPosition = spotlightRadius; const maxPosition = containerSize - spotlightRadius; const movementRange = maxPosition - minPosition;
+            let positions = [];
+            for (let i = 0; i < spotlightSettings.count; i++) {
+                const randomX = Math.random() * movementRange + minPosition; const randomY = Math.random() * movementRange + minPosition; const maskX = randomX - spotlightRadius; const maskY = randomY - spotlightRadius; positions.push(`${maskX}px ${maskY}px`);
+            }
+            const positionsString = positions.join(', ');
+            imageToMask.style.maskPosition = positionsString; imageToMask.style.webkitMaskPosition = positionsString;
+        }
+
+        function startSpotlight() {
+            if (spotlightInterval) clearInterval(spotlightInterval);
+            const singleGradient = `radial-gradient(circle 50px, black 100%, transparent 100%)`; const singleSize = `50px 50px`;
+            const gradients = Array(spotlightSettings.count).fill(singleGradient).join(', '); const sizes = Array(spotlightSettings.count).fill(singleSize).join(', ');
+            imageToMask.style.maskImage = gradients; imageToMask.style.webkitMaskImage = gradients; imageToMask.style.maskSize = sizes; imageToMask.style.webkitMaskSize = sizes;
+            applySpeedTransition();
+            imageToMask.classList.remove('hidden-effect');
+            setTimeout(moveSpotlights, 10);
+            const intervalTime = spotlightSettings.speed * 1000 + 500;
+            spotlightInterval = setInterval(moveSpotlights, intervalTime);
+        }
+
+        function stopSpotlight() {
+            imageToMask.classList.add('hidden-effect');
+            if (spotlightInterval) clearInterval(spotlightInterval);
+            imageToMask.style.maskImage = ''; imageToMask.style.webkitMaskImage = ''; imageToMask.style.maskSize = ''; imageToMask.style.webkitMaskSize = ''; imageToMask.style.maskPosition = ''; imageToMask.style.webkitMaskPosition = '';
+        }
+
         dotCountSlider.addEventListener('input', () => { spotlightSettings.count = parseInt(dotCountSlider.value); dotCountValue.textContent = spotlightSettings.count; if (!imageToMask.classList.contains('hidden-effect')) { startSpotlight(); } });
         speedSlider.addEventListener('input', () => { spotlightSettings.speed = parseFloat(speedSlider.value); speedValue.textContent = `${spotlightSettings.speed.toFixed(1)}s`; if (!imageToMask.classList.contains('hidden-effect')) { startSpotlight(); } });
     </script>
 
-    <!-- Flashcard Script (Unchanged) -->
+    <!-- UPDATED Flashcard Script -->
     <script>
         const imageElement = document.getElementById('myImage'); const randomButton = document.getElementById('randomImageButton'); const specialButton = document.getElementById('specialImageButton'); const textOverlay = document.getElementById('text-overlay'); const TOTAL_IMAGES = 8; let currentImageIndex = 0; const SPECIAL_IMAGE_PATH = 'images/0.png';
         let imageBag = [];
         function createShuffledImageBag() { const initialBag = Array.from({ length: TOTAL_IMAGES }, (_, i) => i + 1); for (let i = initialBag.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [initialBag[i], initialBag[j]] = [initialBag[j], initialBag[i]]; } return initialBag; }
         imageBag = createShuffledImageBag();
+
         function setButtonLoading(button, originalText, isLoading) { if (isLoading) { button.classList.add('loading'); button.textContent = 'Loading...'; } else { button.classList.remove('loading'); button.textContent = originalText; } }
-        imageElement.addEventListener('load', function () { textOverlay.classList.remove('show-text'); imageElement.classList.remove('image-loading'); if (randomButton.classList.contains('loading')) { setButtonLoading(randomButton, "New Picture", false); } if (specialButton.classList.contains('loading')) { setButtonLoading(specialButton, "Back To Ready", false); } });
-        function changeImage(newPath) { imageElement.classList.add('image-loading'); imageElement.src = newPath; }
-        randomButton.addEventListener('click', function () { if (randomButton.classList.contains('loading')) return; setButtonLoading(randomButton, "New Picture", true); textOverlay.classList.add('show-text'); startSpotlight(); setTimeout(() => { if (imageBag.length === 0) { imageBag = createShuffledImageBag(); } const newIndex = imageBag.pop(); currentImageIndex = newIndex; const newImagePath = `images/${currentImageIndex}.png`; changeImage(newImagePath); }, 500); });
-        specialButton.addEventListener('click', function () { if (currentImageIndex === 0 || specialButton.classList.contains('loading')) return; setButtonLoading(specialButton, "Back To Ready", true); currentImageIndex = 0; stopSpotlight(); changeImage(SPECIAL_IMAGE_PATH); });
+        
+        // This is now the core of the new logic
+        imageElement.addEventListener('load', function () {
+            // Check if we are loading a challenge image (not the 'ready' image)
+            if (currentImageIndex !== 0) {
+                startSpotlight(); // Start the spotlights *after* the new image is loaded
+            }
+            
+            // Now reveal the image (which now has the correct mask)
+            imageElement.classList.remove('image-loading');
+            textOverlay.classList.remove('show-text');
+            
+            // Reset button states
+            if (randomButton.classList.contains('loading')) { setButtonLoading(randomButton, "New Picture", false); }
+            if (specialButton.classList.contains('loading')) { setButtonLoading(specialButton, "Back To Ready", false); }
+        });
+        
+        function changeImage(newPath) {
+            imageElement.classList.add('image-loading'); // This now creates the blackout
+            imageElement.src = newPath;
+        }
+        
+        randomButton.addEventListener('click', function () {
+            if (randomButton.classList.contains('loading')) return;
+            
+            // 1. Stop old spotlights and set loading states
+            stopSpotlight();
+            setButtonLoading(randomButton, "New Picture", true);
+            textOverlay.classList.add('show-text');
+            
+            // 2. Blackout the old image and start loading the new one
+            if (imageBag.length === 0) { imageBag = createShuffledImageBag(); }
+            const newIndex = imageBag.pop();
+            currentImageIndex = newIndex;
+            const newImagePath = `images/${currentImageIndex}.png`;
+            changeImage(newImagePath); // This function now handles the blackout
+        });
+        
+        specialButton.addEventListener('click', function () {
+            if (currentImageIndex === 0 || specialButton.classList.contains('loading')) return;
+            
+            // 1. Stop old spotlights and set loading states
+            stopSpotlight();
+            setButtonLoading(specialButton, "Back To Ready", true);
+            currentImageIndex = 0;
+
+            // 2. Blackout the old image and load the 'ready' image
+            changeImage(SPECIAL_IMAGE_PATH);
+        });
+        
+        // Initial setup
         stopSpotlight();
     </script>
 
-    <!-- Dice Script (Unchanged) -->
+    <!-- Dice and Card Scripts (Unchanged) -->
     <script>
         const diceWrapper = document.getElementById('diceWrapper'); const dice = document.getElementById('dice'); let spinCount = 0; const rotations = [ {x: 0,   y: 0}, {x: -90, y: 0}, {x: 0,   y: -90}, {x: 0,   y: 90}, {x: 90,  y: 0}, {x: 180, y: 0} ]; let diceBag = [];
         function createShuffledDiceBag() { const singleSet = [0, 1, 2, 3, 4, 5]; const initialBag = [...singleSet, ...singleSet, ...singleSet]; for (let i = initialBag.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [initialBag[i], initialBag[j]] = [initialBag[j], initialBag[i]]; } return initialBag; }
         diceBag = createShuffledDiceBag();
         diceWrapper.addEventListener('click', () => { if (diceBag.length === 0) { diceBag = createShuffledDiceBag(); } const faceIndex = diceBag.pop(); const targetRot = rotations[faceIndex]; spinCount += 3; const spinAngle = spinCount * 360; const finalX = spinAngle + targetRot.x; const finalY = spinAngle + targetRot.y; dice.style.transform = `rotateX(${finalX}deg) rotateY(${finalY}deg)`; });
     </script>
-    
-    <!-- UPDATED Chance Card Script -->
     <script>
-        const chanceCard = document.getElementById('chanceCard');
-        const cardInner = chanceCard.querySelector('.card');
-        const cardValue = document.getElementById('cardValue');
-        
-        // UPDATED: Card options array
+        const chanceCard = document.getElementById('chanceCard'); const cardInner = chanceCard.querySelector('.card'); const cardValue = document.getElementById('cardValue');
         const cardOptions = ['x2', 'x3', '+10', '+15', '÷5', '-10', '-20'];
-        
-        // NEW: Shuffle Bag logic for the chance card
         let cardBag = [];
-        function createShuffledCardBag() {
-            const singleSet = Array.from({ length: cardOptions.length }, (_, i) => i);
-            const initialBag = [...singleSet, ...singleSet, ...singleSet]; // 3 sets of cards
-            
-            // Fisher-Yates shuffle
-            for (let i = initialBag.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [initialBag[i], initialBag[j]] = [initialBag[j], initialBag[i]];
-            }
-            return initialBag;
-        }
+        function createShuffledCardBag() { const singleSet = Array.from({ length: cardOptions.length }, (_, i) => i); const initialBag = [...singleSet, ...singleSet, ...singleSet]; for (let i = initialBag.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [initialBag[i], initialBag[j]] = [initialBag[j], initialBag[i]]; } return initialBag; }
         cardBag = createShuffledCardBag();
-
-        chanceCard.addEventListener('click', () => {
-            if (cardInner.classList.contains('flipped')) {
-                cardInner.classList.remove('flipped');
-            } else {
-                // UPDATED: Draw from the shuffle bag
-                if (cardBag.length === 0) {
-                    cardBag = createShuffledCardBag(); // Reshuffle if empty
-                }
-                const cardIndex = cardBag.pop(); // Get the next card index
-                const randomValue = cardOptions[cardIndex];
-                
-                cardValue.textContent = randomValue;
-                cardInner.classList.add('flipped');
-            }
-        });
+        chanceCard.addEventListener('click', () => { if (cardInner.classList.contains('flipped')) { cardInner.classList.remove('flipped'); } else { if (cardBag.length === 0) { cardBag = createShuffledCardBag(); } const cardIndex = cardBag.pop(); const randomValue = cardOptions[cardIndex]; cardValue.textContent = randomValue; cardInner.classList.add('flipped'); } });
     </script>
 </body>
 </html>
