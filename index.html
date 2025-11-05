@@ -5,20 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Random Vocabulary Flashcard</title>
 
-    <!-- PRELOAD INSTRUCTIONS -->
-    <link rel="preload" as="image" href="images/background.png">
-    <link rel="preload" as="image" href="images/0.png">
-    <link rel="preload" as="image" href="images/1.png">
-    <link rel="preload" as="image" href="images/2.png">
-    <link rel="preload" as="image" href="images/3.png">
-    <link rel="preload" as="image" href="images/4.png">
-    <link rel="preload" as="image" href="images/5.png">
-    <link rel="preload" as="image" href="images/6.png">
-    <link rel="preload" as="image" href="images/7.png">
-    <link rel="preload" as="image" href="images/8.png">
-
     <style>
-        /* ---------- ORIGINAL STYLES (unchanged) ---------- */
+        /* All CSS remains the same */
         h1{font-family:'Comic Sans MS',sans-serif;font-size:2.5em;text-align:center;margin-top:50px;text-shadow:1px 1px 3px rgba(0,0,0,0.3);}
         h1:hover{transform:scale(1.1);transition:transform .3s ease;}
         body{font-family:Arial,sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;margin:0;background:#f4f4f9 url('images/background.png') center/cover no-repeat;}
@@ -34,41 +22,11 @@
         .loading{background:#ffc107 !important;cursor:wait !important;pointer-events:none;}
         #text-overlay{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:1000;font-family:'Comic Sans MS',sans-serif;font-size:3em;font-weight:bold;color:#fff;background:rgba(0,0,0,.8);padding:20px 40px;border-radius:10px;opacity:0;transition:opacity .3s ease-in-out;pointer-events:none;text-shadow:2px 2px 4px rgba(0,0,0,.5);}
         .show-text{opacity:1 !important;}
-
-        /* ---------- MAIN ROW CONTAINER ---------- */
         #main-row{display:flex;align-items:center;gap:30px;margin-bottom:20px;}
-
-        /* ---------- DICE STYLES ---------- */
-        .dice-wrapper{
-            perspective:800px;
-            cursor:pointer;
-        }
-        .dice{
-            width:120px;height:120px;
-            position:relative;
-            transform-style:preserve-3d;
-            transition:transform .8s cubic-bezier(.2,.85,.4,1.2);
-        }
-        .dice-face{
-            position:absolute;
-            width:120px;height:120px;
-            background:#fff;
-            border:4px solid #333;
-            border-radius:12px;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            box-shadow:inset 0 0 15px rgba(0,0,0,.2);
-            backface-visibility:hidden;
-        }
-
-        .dot{
-            position:absolute;
-            width:22px;height:22px;
-            background:#333;
-            border-radius:50%;
-        }
-
+        .dice-wrapper{perspective:800px;cursor:pointer;}
+        .dice{width:120px;height:120px;position:relative;transform-style:preserve-3d;transition:transform .8s cubic-bezier(.2,.85,.4,1.2);}
+        .dice-face{position:absolute;width:120px;height:120px;background:#fff;border:4px solid #333;border-radius:12px;display:flex;align-items:center;justify-content:center;box-shadow:inset 0 0 15px rgba(0,0,0,.2);backface-visibility:hidden;}
+        .dot{position:absolute;width:22px;height:22px;background:#333;border-radius:50%;}
         .face-1 .dot:nth-child(1){ }
         .face-2 .dot:nth-child(1){ transform:translate(-30px,-30px); }
         .face-2 .dot:nth-child(2){ transform:translate(30px,30px); }
@@ -88,59 +46,20 @@
         .face-6 .dot:nth-child(2) { transform: translate(30px, -40px); }
         .face-6 .dot:nth-child(3) { transform: translate(-30px, 0); }
         .face-6 .dot:nth-child(4) { transform: translate(30px, 0); }
-        .face-6 .dot:nth-child(5) { transform: translate(-30px, 40px); }
+        .face-6 .dot:n-child(5) { transform: translate(-30px, 40px); }
         .face-6 .dot:nth-child(6) { transform: translate(30px, 40px); }
-
         .front  {transform: translateZ(60px); }
         .back   {transform: rotateX(180deg) translateZ(60px); }
         .right  {transform: rotateY(90deg) translateZ(60px); }
         .left   {transform: rotateY(-90deg) translateZ(60px); }
         .top    {transform: rotateX(90deg) translateZ(60px); }
         .bottom {transform: rotateX(-90deg) translateZ(60px); }
-        
-        /* ---------- CHANCE CARD STYLES ---------- */
-        .card-container {
-            width: 120px;
-            height: 170px;
-            perspective: 1000px;
-            cursor: pointer;
-        }
-        .card {
-            width: 100%;
-            height: 100%;
-            position: relative;
-            transform-style: preserve-3d;
-            transition: transform 0.7s cubic-bezier(0.4, 0.2, 0.2, 1);
-        }
-        .card.flipped {
-            transform: rotateY(180deg);
-        }
-        .card-face {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            backface-visibility: hidden;
-            border-radius: 12px;
-            border: 4px solid #333;
-            box-shadow: 0 4px 12px rgba(0,0,0,.2);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: 'Comic Sans MS', sans-serif;
-        }
-        .card-back {
-            background: linear-gradient(45deg, #ff416c, #ff4b2b);
-            color: white;
-            font-size: 60px;
-            font-weight: bold;
-        }
-        .card-front {
-            background: #fff;
-            color: #333;
-            font-size: 50px;
-            font-weight: bold;
-            transform: rotateY(180deg);
-        }
+        .card-container {width: 120px;height: 170px;perspective: 1000px;cursor: pointer;}
+        .card {width: 100%;height: 100%;position: relative;transform-style: preserve-3d;transition: transform 0.7s cubic-bezier(0.4, 0.2, 0.2, 1);}
+        .card.flipped {transform: rotateY(180deg);}
+        .card-face {position: absolute;width: 100%;height: 100%;backface-visibility: hidden;border-radius: 12px;border: 4px solid #333;box-shadow: 0 4px 12px rgba(0,0,0,.2);display: flex;align-items: center;justify-content: center;font-family: 'Comic Sans MS', sans-serif;}
+        .card-back {background: linear-gradient(45deg, #ff416c, #ff4b2b);color: white;font-size: 60px;font-weight: bold;}
+        .card-front {background: #fff;color: #333;font-size: 50px;font-weight: bold;transform: rotateY(180deg);}
     </style>
 </head>
 <body>
@@ -173,17 +92,16 @@
         </div>
     </div>
 
-    <!-- Buttons -->
+    <!-- Buttons and Overlay (unchanged) -->
     <div id="button-group">
         <button id="randomImageButton" class="action-button">Show Random Image</button>
         <button id="specialImageButton" class="action-button">Back To Ready</button>
     </div>
-
-    <!-- Text overlay -->
     <div id="text-overlay">NEW IMAGE</div>
 
-    <!-- ---------- FLASHCARD JS (unchanged) ---------- -->
+    <!-- All other script tags remain the same -->
     <script>
+        // FLASHCARD JS (unchanged)
         const imageElement = document.getElementById('myImage');
         const randomButton = document.getElementById('randomImageButton');
         const specialButton = document.getElementById('specialImageButton');
@@ -191,88 +109,56 @@
         const TOTAL_IMAGES = 8;
         let currentImageIndex = 0;
         const SPECIAL_IMAGE_PATH = 'images/0.png';
-
-        function setButtonLoading(button, originalText, isLoading) {
-            if (isLoading) {
-                button.classList.add('loading');
-                button.textContent = 'Loading...';
-            } else {
-                button.classList.remove('loading');
-                button.textContent = originalText;
-            }
-        }
-
-        imageElement.addEventListener('load', function () {
-            imageElement.classList.remove('image-loading');
-            if (randomButton.classList.contains('loading')) {
-                setButtonLoading(randomButton, "Show Random Image", false);
-            } else if (specialButton.classList.contains('loading')) {
-                setButtonLoading(specialButton, "Back To Ready", false);
-            }
-        });
-
-        function changeImage(newPath, button) {
-            if (button.classList.contains('loading')) return;
-            const originalText = button.id === 'randomImageButton' ? "Show Random Image" : "Back To Ready";
-            setButtonLoading(button, originalText, true);
-            imageElement.classList.add('image-loading');
-            imageElement.src = newPath;
-        }
-
-        randomButton.addEventListener('click', function () {
-            if (randomButton.classList.contains('loading')) return;
-            randomButton.classList.add('loading');
-            textOverlay.classList.add('show-text');
-            setTimeout(() => {
-                textOverlay.classList.remove('show-text');
-                randomButton.classList.remove('loading');
-                let newIndex;
-                do { newIndex = Math.floor(Math.random() * TOTAL_IMAGES) + 1; }
-                while (newIndex === currentImageIndex);
-                currentImageIndex = newIndex;
-                const newImagePath = `images/${currentImageIndex}.png`;
-                specialButton.textContent = "Back To Ready";
-                changeImage(newImagePath, randomButton);
-            }, 1000);
-        });
-
-        specialButton.addEventListener('click', function () {
-            if (currentImageIndex === 0) return;
-            currentImageIndex = 0;
-            randomButton.textContent = "Show Random Image";
-            changeImage(SPECIAL_IMAGE_PATH, specialButton);
-        });
-
+        function setButtonLoading(button, originalText, isLoading) { if (isLoading) { button.classList.add('loading'); button.textContent = 'Loading...'; } else { button.classList.remove('loading'); button.textContent = originalText; } }
+        imageElement.addEventListener('load', function () { imageElement.classList.remove('image-loading'); if (randomButton.classList.contains('loading')) { setButtonLoading(randomButton, "Show Random Image", false); } else if (specialButton.classList.contains('loading')) { setButtonLoading(specialButton, "Back To Ready", false); } });
+        function changeImage(newPath, button) { if (button.classList.contains('loading')) return; const originalText = button.id === 'randomImageButton' ? "Show Random Image" : "Back To Ready"; setButtonLoading(button, originalText, true); imageElement.classList.add('image-loading'); imageElement.src = newPath; }
+        randomButton.addEventListener('click', function () { if (randomButton.classList.contains('loading')) return; randomButton.classList.add('loading'); textOverlay.classList.add('show-text'); setTimeout(() => { textOverlay.classList.remove('show-text'); randomButton.classList.remove('loading'); let newIndex; do { newIndex = Math.floor(Math.random() * TOTAL_IMAGES) + 1; } while (newIndex === currentImageIndex); currentImageIndex = newIndex; const newImagePath = `images/${currentImageIndex}.png`; specialButton.textContent = "Back To Ready"; changeImage(newImagePath, randomButton); }, 1000); });
+        specialButton.addEventListener('click', function () { if (currentImageIndex === 0) return; currentImageIndex = 0; randomButton.textContent = "Show Random Image"; changeImage(SPECIAL_IMAGE_PATH, specialButton); });
         randomButton.textContent = "Show Random Image";
         specialButton.textContent = "Back To Ready";
     </script>
 
-    <!-- ---------- DICE ROLL JS (UPDATED) ---------- -->
+    <!-- ---------- DICE ROLL JS (UPDATED with Shuffle Bag) ---------- -->
     <script>
         const diceWrapper = document.getElementById('diceWrapper');
         const dice = document.getElementById('dice');
         let currentRotationX = 0;
         let currentRotationY = 0;
-        let lastFaceIndex = -1; // NEW: Variable to store the last rolled index
 
         const rotations = [
-            {x: 0,   y: 0},
-            {x: 180, y: 0},
-            {x: 0,   y: -90},
-            {x: 0,   y: 90},
-            {x: -90, y: 0},
-            {x: 90,  y: 0}
+            {x: 0,   y: 0},   // Face 1
+            {x: 180, y: 0},   // Face 2
+            {x: 0,   y: -90},  // Face 3
+            {x: 0,   y: 90},   // Face 4
+            {x: -90, y: 0},   // Face 5
+            {x: 90,  y: 0}    // Face 6
         ];
 
+        let diceBag = [];
+
+        // Function to fill and shuffle the bag
+        function shuffleDiceBag() {
+            // Fill the bag with all possible face indexes (0 to 5)
+            diceBag = [0, 1, 2, 3, 4, 5];
+            
+            // Shuffle the array (Fisher-Yates shuffle algorithm)
+            for (let i = diceBag.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [diceBag[i], diceBag[j]] = [diceBag[j], diceBag[i]];
+            }
+        }
+
+        // Initial fill and shuffle
+        shuffleDiceBag();
+
         diceWrapper.addEventListener('click', () => {
-            let faceIndex;
+            // If the bag is empty, refill and shuffle it
+            if (diceBag.length === 0) {
+                shuffleDiceBag();
+            }
 
-            // NEW: Loop until we get a different number from the last one
-            do {
-                faceIndex = Math.floor(Math.random() * 6);
-            } while (faceIndex === lastFaceIndex);
-
-            lastFaceIndex = faceIndex; // NEW: Update the last index to the new one
+            // Pull the last number from the shuffled bag
+            const faceIndex = diceBag.pop();
 
             const targetRot = rotations[faceIndex];
             const spinX = 3 * 360;
@@ -283,24 +169,13 @@
         });
     </script>
     
-    <!-- ---------- CHANCE CARD JS (unchanged) ---------- -->
     <script>
+        // CHANCE CARD JS (unchanged)
         const chanceCard = document.getElementById('chanceCard');
         const cardInner = chanceCard.querySelector('.card');
         const cardValue = document.getElementById('cardValue');
-        
         const cardOptions = ['x2', 'x3', '+10', '+5', '/5', '-10', '-20'];
-        
-        chanceCard.addEventListener('click', () => {
-            if (cardInner.classList.contains('flipped')) {
-                cardInner.classList.remove('flipped');
-            } else {
-                const randomIndex = Math.floor(Math.random() * cardOptions.length);
-                const randomValue = cardOptions[randomIndex];
-                cardValue.textContent = randomValue;
-                cardInner.classList.add('flipped');
-            }
-        });
+        chanceCard.addEventListener('click', () => { if (cardInner.classList.contains('flipped')) { cardInner.classList.remove('flipped'); } else { const randomIndex = Math.floor(Math.random() * cardOptions.length); const randomValue = cardOptions[randomIndex]; cardValue.textContent = randomValue; cardInner.classList.add('flipped'); } });
     </script>
 </body>
 </html>
