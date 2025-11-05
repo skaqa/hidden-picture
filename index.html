@@ -3,15 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Random Vocabulary Flashcard</title>
+    <title>Hidden Picture Challenge</title>
     <style>
-        /* CSS is unchanged */
+        /* --- Basic Styles (Unchanged) --- */
         h1{font-family:'Comic Sans MS',sans-serif;font-size:2.5em;text-align:center;margin-top:50px;text-shadow:1px 1px 3px rgba(0,0,0,0.3);}
         h1:hover{transform:scale(1.1);transition:transform .3s ease;}
         body{font-family:Arial,sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;margin:0;background:#f4f4f9 url('images/background.png') center/cover no-repeat;}
-        #image-container{margin-bottom:20px;border:5px solid #ccc;border-radius:8px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,.2);}
-        #myImage{width:400px;height:400px;object-fit:cover;display:block;opacity:1;transition:opacity .3s ease-in-out;}
-        .image-loading{opacity:0;}
+        #main-row{display:flex;align-items:center;gap:30px;margin-bottom:20px;}
         #button-group{display:flex;gap:15px;}
         .action-button{padding:12px 25px;font-size:18px;cursor:pointer;border:none;border-radius:5px;transition:background-color .3s ease;}
         #randomImageButton{background:#007bff;color:#fff;}
@@ -21,32 +19,60 @@
         .loading{background:#ffc107 !important;cursor:wait !important;pointer-events:none;}
         #text-overlay{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:1000;font-family:'Comic Sans MS',sans-serif;font-size:3em;font-weight:bold;color:#fff;background:rgba(0,0,0,.8);padding:20px 40px;border-radius:10px;opacity:0;transition:opacity .3s ease-in-out;pointer-events:none;text-shadow:2px 2px 4px rgba(0,0,0,.5);}
         .show-text{opacity:1 !important;}
-        #main-row{display:flex;align-items:center;gap:30px;margin-bottom:20px;}
+
+        /* --- NEW: Hidden Picture Styles --- */
+        #image-container {
+            position: relative; /* Required for the overlay to be positioned correctly */
+            width: 400px;
+            height: 400px;
+            border: 5px solid #ccc;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,.2);
+            cursor: pointer;
+        }
+        #myImage {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            transition: opacity .3s ease-in-out;
+        }
+        .image-loading {
+            opacity: 0;
+        }
+        /* The overlay that creates the "hidden" effect */
+        #image-container::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            /* This creates a dynamic, semi-transparent noise pattern */
+            background-image: radial-gradient(rgba(0, 0, 0, 0.3) 1px, transparent 1px);
+            background-size: 4px 4px;
+            opacity: 1;
+            transition: opacity 0.4s ease;
+            pointer-events: none; /* Allows clicks to go through to elements behind it if needed */
+        }
+        /* When hovering over the container, the overlay fades, "revealing" the image */
+        #image-container:hover::after {
+            opacity: 0.2;
+        }
+
+
+        /* --- Dice and Card Styles (Unchanged) --- */
         .dice-wrapper{perspective:800px;cursor:pointer;}
         .dice{width:120px;height:120px;position:relative;transform-style:preserve-3d;transition:transform .8s cubic-bezier(.2,.85,.4,1.2);}
         .dice-face{position:absolute;width:120px;height:120px;background:#fff;border:4px solid #333;border-radius:12px;display:flex;align-items:center;justify-content:center;box-shadow:inset 0 0 15px rgba(0,0,0,.2);backface-visibility:hidden;}
         .dot{position:absolute;width:22px;height:22px;background:#333;border-radius:50%;}
         .face-1 .dot:nth-child(1){ }
-        .face-2 .dot:nth-child(1){ transform:translate(-30px,-30px); }
-        .face-2 .dot:nth-child(2){ transform:translate(30px,30px); }
-        .face-3 .dot:nth-child(1){ transform:translate(-30px,-30px); }
-        .face-3 .dot:nth-child(2){ transform:translate(0,0); }
-        .face-3 .dot:nth-child(3){ transform:translate(30px,30px); }
-        .face-4 .dot:nth-child(1){ transform:translate(-30px,-30px); }
-        .face-4 .dot:nth-child(2){ transform:translate(30px,-30px); }
-        .face-4 .dot:nth-child(3){ transform:translate(-30px,30px); }
-        .face-4 .dot:nth-child(4){ transform:translate(30px,30px); }
-        .face-5 .dot:nth-child(1){ transform:translate(-30px,-30px); }
-        .face-5 .dot:nth-child(2){ transform:translate(30px,-30px); }
-        .face-5 .dot:nth-child(3){ transform:translate(0,0); }
-        .face-5 .dot:nth-child(4){ transform:translate(-30px,30px); }
-        .face-5 .dot:nth-child(5){ transform:translate(30px,30px); }
-        .face-6 .dot:nth-child(1) { transform: translate(-30px, -40px); }
-        .face-6 .dot:nth-child(2) { transform: translate(30px, -40px); }
-        .face-6 .dot:nth-child(3) { transform: translate(-30px, 0); }
-        .face-6 .dot:nth-child(4) { transform: translate(30px, 0); }
-        .face-6 .dot:nth-child(5) { transform: translate(-30px, 40px); }
-        .face-6 .dot:nth-child(6) { transform: translate(30px, 40px); }
+        .face-2 .dot:nth-child(1){ transform:translate(-30px,-30px); } .face-2 .dot:nth-child(2){ transform:translate(30px,30px); }
+        .face-3 .dot:nth-child(1){ transform:translate(-30px,-30px); } .face-3 .dot:nth-child(2){ transform:translate(0,0); } .face-3 .dot:nth-child(3){ transform:translate(30px,30px); }
+        .face-4 .dot:nth-child(1){ transform:translate(-30px,-30px); } .face-4 .dot:nth-child(2){ transform:translate(30px,-30px); } .face-4 .dot:nth-child(3){ transform:translate(-30px,30px); } .face-4 .dot:nth-child(4){ transform:translate(30px,30px); }
+        .face-5 .dot:nth-child(1){ transform:translate(-30px,-30px); } .face-5 .dot:nth-child(2){ transform:translate(30px,-30px); } .face-5 .dot:nth-child(3){ transform:translate(0,0); } .face-5 .dot:nth-child(4){ transform:translate(-30px,30px); } .face-5 .dot:nth-child(5){ transform:translate(30px,30px); }
+        .face-6 .dot:nth-child(1) { transform: translate(-30px, -40px); } .face-6 .dot:nth-child(2) { transform: translate(30px, -40px); } .face-6 .dot:nth-child(3) { transform: translate(-30px, 0); } .face-6 .dot:nth-child(4) { transform: translate(30px, 0); } .face-6 .dot:nth-child(5) { transform: translate(-30px, 40px); } .face-6 .dot:nth-child(6) { transform: translate(30px, 40px); }
         .front  {transform: translateZ(60px); }
         .back   {transform: rotateX(180deg) translateZ(60px); }
         .right  {transform: rotateY(90deg) translateZ(60px); }
@@ -62,11 +88,14 @@
     </style>
 </head>
 <body>
-    <h1>Word Picture Challenge</h1>
+    <h1>Hidden Picture Challenge</h1>
     <div id="main-row">
+        <!-- HTML for the image is now just the container with the image inside -->
         <div id="image-container">
-            <img id="myImage" src="images/0.png" alt="Currently displayed image" decoding="async">
+            <img id="myImage" src="images/0.png" alt="Hidden Picture Challenge">
         </div>
+
+        <!-- Dice -->
         <div class="dice-wrapper" id="diceWrapper">
             <div class="dice" id="dice">
                 <div class="dice-face front face-1"><div class="dot"></div></div>
@@ -77,6 +106,8 @@
                 <div class="dice-face left face-4"><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
             </div>
         </div>
+        
+        <!-- Chance Card -->
         <div class="card-container" id="chanceCard">
             <div class="card">
                 <div class="card-face card-back">?</div>
@@ -85,68 +116,18 @@
         </div>
     </div>
     <div id="button-group">
-        <button id="randomImageButton" class="action-button">Show Random Image</button>
+        <button id="randomImageButton" class="action-button">New Picture</button>
         <button id="specialImageButton" class="action-button">Back To Ready</button>
     </div>
     <div id="text-overlay">NEW IMAGE</div>
 
-    <!-- FLASHCARD JS (unchanged) -->
+    <!-- SCRIPTS (Unchanged) -->
     <script>
-        const imageElement = document.getElementById('myImage'); const randomButton = document.getElementById('randomImageButton'); const specialButton = document.getElementById('specialImageButton'); const textOverlay = document.getElementById('text-overlay'); const TOTAL_IMAGES = 8; let currentImageIndex = 0; const SPECIAL_IMAGE_PATH = 'images/0.png'; function setButtonLoading(button, originalText, isLoading) { if (isLoading) { button.classList.add('loading'); button.textContent = 'Loading...'; } else { button.classList.remove('loading'); button.textContent = originalText; } } imageElement.addEventListener('load', function () { imageElement.classList.remove('image-loading'); if (randomButton.classList.contains('loading')) { setButtonLoading(randomButton, "Show Random Image", false); } else if (specialButton.classList.contains('loading')) { setButtonLoading(specialButton, "Back To Ready", false); } }); function changeImage(newPath, button) { if (button.classList.contains('loading')) return; const originalText = button.id === 'randomImageButton' ? "Show Random Image" : "Back To Ready"; setButtonLoading(button, originalText, true); imageElement.classList.add('image-loading'); imageElement.src = newPath; } randomButton.addEventListener('click', function () { if (randomButton.classList.contains('loading')) return; randomButton.classList.add('loading'); textOverlay.classList.add('show-text'); setTimeout(() => { textOverlay.classList.remove('show-text'); randomButton.classList.remove('loading'); let newIndex; do { newIndex = Math.floor(Math.random() * TOTAL_IMAGES) + 1; } while (newIndex === currentImageIndex); currentImageIndex = newIndex; const newImagePath = `images/${currentImageIndex}.png`; specialButton.textContent = "Back To Ready"; changeImage(newImagePath, randomButton); }, 1000); }); specialButton.addEventListener('click', function () { if (currentImageIndex === 0) return; currentImageIndex = 0; randomButton.textContent = "Show Random Image"; changeImage(SPECIAL_IMAGE_PATH, specialButton); }); randomButton.textContent = "Show Random Image"; specialButton.textContent = "Back To Ready";
+        const imageElement = document.getElementById('myImage'); const randomButton = document.getElementById('randomImageButton'); const specialButton = document.getElementById('specialImageButton'); const textOverlay = document.getElementById('text-overlay'); const TOTAL_IMAGES = 8; let currentImageIndex = 0; const SPECIAL_IMAGE_PATH = 'images/0.png'; function setButtonLoading(button, originalText, isLoading) { if (isLoading) { button.classList.add('loading'); button.textContent = 'Loading...'; } else { button.classList.remove('loading'); button.textContent = originalText; } } imageElement.addEventListener('load', function () { imageElement.classList.remove('image-loading'); if (randomButton.classList.contains('loading')) { setButtonLoading(randomButton, "New Picture", false); } else if (specialButton.classList.contains('loading')) { setButtonLoading(specialButton, "Back To Ready", false); } }); function changeImage(newPath, button) { if (button.classList.contains('loading')) return; const originalText = button.id === 'randomImageButton' ? "New Picture" : "Back To Ready"; setButtonLoading(button, originalText, true); imageElement.classList.add('image-loading'); imageElement.src = newPath; } randomButton.addEventListener('click', function () { if (randomButton.classList.contains('loading')) return; randomButton.classList.add('loading'); textOverlay.classList.add('show-text'); setTimeout(() => { textOverlay.classList.remove('show-text'); randomButton.classList.remove('loading'); let newIndex; do { newIndex = Math.floor(Math.random() * TOTAL_IMAGES) + 1; } while (newIndex === currentImageIndex); currentImageIndex = newIndex; const newImagePath = `images/${currentImageIndex}.png`; specialButton.textContent = "Back To Ready"; changeImage(newImagePath, randomButton); }, 1000); }); specialButton.addEventListener('click', function () { if (currentImageIndex === 0) return; currentImageIndex = 0; randomButton.textContent = "New Picture"; changeImage(SPECIAL_IMAGE_PATH, specialButton); }); randomButton.textContent = "New Picture"; specialButton.textContent = "Back To Ready";
     </script>
-
-    <!-- DICE ROLL JS (FINAL, CORRECTED LOGIC) -->
     <script>
-        const diceWrapper = document.getElementById('diceWrapper');
-        const dice = document.getElementById('dice');
-        
-        // This variable will track the number of full spins for the animation
-        let spinCount = 0;
-
-        const rotations = [
-            {x: 0,   y: 0},   // Index 0 (Roll 1)
-            {x: -90, y: 0},   // Index 1 (Roll 2)
-            {x: 0,   y: -90},  // Index 2 (Roll 3)
-            {x: 0,   y: 90},   // Index 3 (Roll 4)
-            {x: 90,  y: 0},   // Index 4 (Roll 5)
-            {x: 180, y: 0}    // Index 5 (Roll 6)
-        ];
-
-        let diceBag = [];
-
-        function createShuffledBag() {
-            const initialBag = [0, 1, 2, 3, 4, 5];
-            for (let i = initialBag.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [initialBag[i], initialBag[j]] = [initialBag[j], initialBag[i]];
-            }
-            return initialBag;
-        }
-
-        diceBag = createShuffledBag();
-
-        diceWrapper.addEventListener('click', () => {
-            if (diceBag.length === 0) {
-                diceBag = createShuffledBag();
-            }
-
-            const faceIndex = diceBag.pop();
-            const targetRot = rotations[faceIndex];
-
-            // Add 3 full spins for a good animation feel
-            spinCount += 3;
-            const spinAngle = spinCount * 360;
-
-            // The new logic: The final rotation is the spin *plus* the absolute target rotation.
-            // This ensures the die always lands on the correct face.
-            const finalX = spinAngle + targetRot.x;
-            const finalY = spinAngle + targetRot.y;
-
-            dice.style.transform = `rotateX(${finalX}deg) rotateY(${finalY}deg)`;
-        });
+        const diceWrapper = document.getElementById('diceWrapper'); const dice = document.getElementById('dice'); let spinCount = 0; const rotations = [ {x: 0,   y: 0}, {x: -90, y: 0}, {x: 0,   y: -90}, {x: 0,   y: 90}, {x: 90,  y: 0}, {x: 180, y: 0} ]; let diceBag = []; function createShuffledBag() { const initialBag = [0, 1, 2, 3, 4, 5]; for (let i = initialBag.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [initialBag[i], initialBag[j]] = [initialBag[j], initialBag[i]]; } return initialBag; } diceBag = createShuffledBag(); diceWrapper.addEventListener('click', () => { if (diceBag.length === 0) { diceBag = createShuffledBag(); } const faceIndex = diceBag.pop(); const targetRot = rotations[faceIndex]; spinCount += 3; const spinAngle = spinCount * 360; const finalX = spinAngle + targetRot.x; const finalY = spinAngle + targetRot.y; dice.style.transform = `rotateX(${finalX}deg) rotateY(${finalY}deg)`; });
     </script>
-    
-    <!-- CHANCE CARD JS (unchanged) -->
     <script>
         const chanceCard = document.getElementById('chanceCard'); const cardInner = chanceCard.querySelector('.card'); const cardValue = document.getElementById('cardValue'); const cardOptions = ['x2', 'x3', '+10', '+5', '/5', '-10', '-20']; chanceCard.addEventListener('click', () => { if (cardInner.classList.contains('flipped')) { cardInner.classList.remove('flipped'); } else { const randomIndex = Math.floor(Math.random() * cardOptions.length); const randomValue = cardOptions[randomIndex]; cardValue.textContent = randomValue; cardInner.classList.add('flipped'); } });
     </script>
