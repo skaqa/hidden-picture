@@ -98,10 +98,10 @@
         .top    {transform: rotateX(90deg) translateZ(60px); }
         .bottom {transform: rotateX(-90deg) translateZ(60px); }
         
-        /* ---------- NEW: CHANCE CARD STYLES ---------- */
+        /* ---------- CHANCE CARD STYLES ---------- */
         .card-container {
             width: 120px;
-            height: 170px; /* Taller than it is wide */
+            height: 170px;
             perspective: 1000px;
             cursor: pointer;
         }
@@ -164,7 +164,7 @@
             </div>
         </div>
 
-        <!-- NEW: Chance Card Deck -->
+        <!-- Chance Card Deck -->
         <div class="card-container" id="chanceCard">
             <div class="card">
                 <div class="card-face card-back">?</div>
@@ -247,12 +247,14 @@
         specialButton.textContent = "Back To Ready";
     </script>
 
-    <!-- ---------- DICE ROLL JS (unchanged) ---------- -->
+    <!-- ---------- DICE ROLL JS (UPDATED) ---------- -->
     <script>
         const diceWrapper = document.getElementById('diceWrapper');
         const dice = document.getElementById('dice');
         let currentRotationX = 0;
         let currentRotationY = 0;
+        let lastFaceIndex = -1; // NEW: Variable to store the last rolled index
+
         const rotations = [
             {x: 0,   y: 0},
             {x: 180, y: 0},
@@ -261,8 +263,17 @@
             {x: -90, y: 0},
             {x: 90,  y: 0}
         ];
+
         diceWrapper.addEventListener('click', () => {
-            const faceIndex = Math.floor(Math.random() * 6);
+            let faceIndex;
+
+            // NEW: Loop until we get a different number from the last one
+            do {
+                faceIndex = Math.floor(Math.random() * 6);
+            } while (faceIndex === lastFaceIndex);
+
+            lastFaceIndex = faceIndex; // NEW: Update the last index to the new one
+
             const targetRot = rotations[faceIndex];
             const spinX = 3 * 360;
             const spinY = 3 * 360;
@@ -272,7 +283,7 @@
         });
     </script>
     
-    <!-- ---------- NEW: CHANCE CARD JS ---------- -->
+    <!-- ---------- CHANCE CARD JS (unchanged) ---------- -->
     <script>
         const chanceCard = document.getElementById('chanceCard');
         const cardInner = chanceCard.querySelector('.card');
@@ -281,18 +292,12 @@
         const cardOptions = ['x2', 'x3', '+10', '+5', '/5', '-10', '-20'];
         
         chanceCard.addEventListener('click', () => {
-            // If card is already flipped, flip it back
             if (cardInner.classList.contains('flipped')) {
                 cardInner.classList.remove('flipped');
             } else {
-                // Choose a random value
                 const randomIndex = Math.floor(Math.random() * cardOptions.length);
                 const randomValue = cardOptions[randomIndex];
-                
-                // Set the value on the card front
                 cardValue.textContent = randomValue;
-                
-                // Flip the card
                 cardInner.classList.add('flipped');
             }
         });
