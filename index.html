@@ -111,13 +111,13 @@
         .face-6 .dot:nth-child(6){ grid-area:3/3/4/4; } /* Bottom-right */
 
 
-        /* ---- 3-D face rotations ---- */
-        .front  {transform:translateZ(60px);}
-        .back   {transform:rotateX(180deg) translateZ(60px);}
-        .right  {transform:rotateY(90deg) translateZ(60px);}
-        .left   {transform:rotateY(-90deg) translateZ(60px);}
-        .top    {transform:rotateX(90deg) translateZ(60px);}
-        .bottom {transform:rotateX(-90deg) translateZ(60px);}
+        /* ---- 3-D face rotations (FIXED order) ---- */
+        .front  {transform: translateZ(60px); }
+        .back   {transform: rotateX(180deg) translateZ(60px); }
+        .right  {transform: rotateY(90deg) translateZ(60px); }
+        .left   {transform: rotateY(-90deg) translateZ(60px); }
+        .top    {transform: rotateX(90deg) translateZ(60px); }
+        .bottom {transform: rotateX(-90deg) translateZ(60px); }
     </style>
 </head>
 <body>
@@ -250,6 +250,10 @@
         const diceWrapper = document.getElementById('diceWrapper');
         const dice = document.getElementById('dice');
 
+        // Store the current rotation state
+        let currentRotationX = 0;
+        let currentRotationY = 0;
+
         const rotations = [
             {x: 0,   y: 0},     // 1
             {x: 180, y: 0},     // 2
@@ -260,10 +264,16 @@
         ];
 
         diceWrapper.addEventListener('click', () => {
-            const face = Math.floor(Math.random() * 6);
-            const rot = rotations[face];
-            const extra = Math.floor(Math.random() * 4) * 360; // Add extra full rotations for more randomness
-            dice.style.transform = `rotateX(${rot.x + extra}deg) rotateY(${rot.y + extra}deg)`;
+            const faceIndex = Math.floor(Math.random() * 6);
+            const targetRot = rotations[faceIndex];
+
+            const spinX = 3 * 360; // 3 full rotations
+            const spinY = 3 * 360; // 3 full rotations
+
+            currentRotationX += targetRot.x + spinX;
+            currentRotationY += targetRot.y + spinY;
+            
+            dice.style.transform = `rotateX(${currentRotationX}deg) rotateY(${currentRotationY}deg)`;
         });
     </script>
 </body>
