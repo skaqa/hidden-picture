@@ -29,7 +29,6 @@
             border-radius: 8px;
             overflow: hidden;
             box-shadow: 0 4px 12px rgba(0,0,0,.2);
-            /* Cursor is normal now, not interactive */
             cursor: default;
         }
         #myImage {
@@ -38,18 +37,30 @@
             object-fit: cover;
             display: block;
         }
-        #image-overlay {
+        /* NEW: Container for the moving blinder dots */
+        #blinder-container {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.95);
-            /* The hole starts in the center */
-            clip-path: circle(75px at 50% 50%);
-            /* Make the movement between spots smooth and elegant */
-            transition: clip-path 1.5s ease-in-out;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none; /* Allows clicks to pass through */
+            opacity: 1;
+            transition: opacity 0.3s ease-in-out;
         }
+        /* NEW: Style for when the container is hidden */
+        #blinder-container.hidden {
+            opacity: 0;
+        }
+        /* NEW: Style for each individual black dot */
+        .blinder-dot {
+            position: absolute;
+            background-color: black;
+            width: 120px; /* Size of each dot */
+            height: 120px;
+            border-radius: 50%;
+            /* Smooth transition for when the dots move */
+            transition: top 2s ease-in-out, left 2s ease-in-out;
+        }
+
 
         /* --- Dice and Card Styles (Unchanged) --- */
         .dice-wrapper{perspective:800px;cursor:pointer;}
@@ -64,9 +75,10 @@
 <body>
     <h1>Hidden Picture Challenge</h1>
     <div id="main-row">
+        <!-- UPDATED HTML: Blinder container is now here -->
         <div id="image-container">
             <img id="myImage" src="images/0.png" alt="Hidden Picture Challenge">
-            <div id="image-overlay"></div>
+            <div id="blinder-container" class="hidden"></div>
         </div>
 
         <!-- Dice and Card (Unchanged) -->
@@ -79,27 +91,105 @@
     </div>
     <div id="text-overlay">NEW IMAGE</div>
 
-    <!-- NEW SCRIPT for the Automated Spotlight Effect -->
+    <!-- NEW SCRIPT for Blinder Dots Effect -->
     <script>
-        const overlay = document.getElementById('image-overlay');
+        const blinderContainer = document.getElementById('blinder-container');
+        const DOT_COUNT = 10;
+        let blinderInterval = null;
 
-        function moveSpotlight() {
-            // Generate random positions (as percentages) to keep the spotlight on the image
-            const randomX = Math.floor(Math.random() * 80) + 10; // Random % between 10% and 90%
-            const randomY = Math.floor(Math.random() * 80) + 10; // Random % between 10% and 90%
-
-            // Update the clip-path to move the spotlight to the new random position
-            overlay.style.clipPath = `circle(75px at ${randomX}% ${randomY}%)`;
+        function moveBlinders() {
+            const dots = blinderContainer.children;
+            for (const dot of dots) {
+                // Position dots randomly. -25% to 125% makes them move fully on and off screen.
+                const randomX = Math.random() * 150 - 25;
+                const randomY = Math.random() * 150 - 25;
+                dot.style.left = `${randomX}%`;
+                dot.style.top = `${randomY}%`;
+            }
         }
 
-        // Call the function every 2.5 seconds to move the spotlight to a new area
-        setInterval(moveSpotlight, 2500);
+        function startBlinders() {
+            if (blinderInterval) clearInterval(blinderInterval); // Clear any old interval
+            blinderContainer.innerHTML = ''; // Clear out old dots
+            
+            // Create 10 new dot elements
+            for (let i = 0; i < DOT_COUNT; i++) {
+                const dot = document.createElement('div');
+                dot.className = 'blinder-dot';
+                blinderContainer.appendChild(dot);
+            }
+            
+            blinderContainer.classList.remove('hidden'); // Make the container visible
+            
+            // Move them to their first random position immediately
+            setTimeout(moveBlinders, 100);
+            
+            // Set an interval to keep moving them every 2 seconds
+            blinderInterval = setInterval(moveBlinders, 2000);
+        }
+
+        function stopBlinders() {
+            blinderContainer.classList.add('hidden'); // Hide the container
+            if (blinderInterval) clearInterval(blinderInterval); // Stop the movement
+        }
     </script>
 
-    <!-- Other Scripts (Unchanged) -->
+    <!-- UPDATED FLASHCARD SCRIPT -->
     <script>
-        const imageElement = document.getElementById('myImage'); const randomButton = document.getElementById('randomImageButton'); const specialButton = document.getElementById('specialImageButton'); const textOverlay = document.getElementById('text-overlay'); const TOTAL_IMAGES = 8; let currentImageIndex = 0; const SPECIAL_IMAGE_PATH = 'images/0.png'; function setButtonLoading(button, originalText, isLoading) { if (isLoading) { button.classList.add('loading'); button.textContent = 'Loading...'; } else { button.classList.remove('loading'); button.textContent = originalText; } } imageElement.addEventListener('load', function () { imageElement.classList.remove('image-loading'); if (randomButton.classList.contains('loading')) { setButtonLoading(randomButton, "New Picture", false); } else if (specialButton.classList.contains('loading')) { setButtonLoading(specialButton, "Back To Ready", false); } }); function changeImage(newPath, button) { if (button.classList.contains('loading')) return; const originalText = button.id === 'randomImageButton' ? "New Picture" : "Back To Ready"; setButtonLoading(button, originalText, true); imageElement.classList.add('image-loading'); imageElement.src = newPath; } randomButton.addEventListener('click', function () { if (randomButton.classList.contains('loading')) return; randomButton.classList.add('loading'); textOverlay.classList.add('show-text'); setTimeout(() => { textOverlay.classList.remove('show-text'); randomButton.classList.remove('loading'); let newIndex; do { newIndex = Math.floor(Math.random() * TOTAL_IMAGES) + 1; } while (newIndex === currentImageIndex); currentImageIndex = newIndex; const newImagePath = `images/${currentImageIndex}.png`; specialButton.textContent = "Back To Ready"; changeImage(newImagePath, randomButton); }, 1000); }); specialButton.addEventListener('click', function () { if (currentImageIndex === 0) return; currentImageIndex = 0; randomButton.textContent = "New Picture"; changeImage(SPECIAL_IMAGE_PATH, specialButton); }); randomButton.textContent = "New Picture"; specialButton.textContent = "Back To Ready";
+        const imageElement = document.getElementById('myImage'); const randomButton = document.getElementById('randomImageButton'); const specialButton = document.getElementById('specialImageButton'); const textOverlay = document.getElementById('text-overlay'); const TOTAL_IMAGES = 8; let currentImageIndex = 0; const SPECIAL_IMAGE_PATH = 'images/0.png';
+        
+        function setButtonLoading(button, originalText, isLoading) { if (isLoading) { button.classList.add('loading'); button.textContent = 'Loading...'; } else { button.classList.remove('loading'); button.textContent = originalText; } }
+        
+        imageElement.addEventListener('load', function () {
+            imageElement.classList.remove('image-loading');
+            
+            // Logic for showing/hiding blinders is now here
+            if (currentImageIndex === 0) {
+                stopBlinders();
+            } else {
+                startBlinders();
+            }
+            
+            if (randomButton.classList.contains('loading')) { setButtonLoading(randomButton, "New Picture", false); } else if (specialButton.classList.contains('loading')) { setButtonLoading(specialButton, "Back To Ready", false); }
+        });
+        
+        function changeImage(newPath, button) {
+            if (button.classList.contains('loading')) return;
+            // Stop the effect immediately when a change is initiated
+            stopBlinders();
+            const originalText = button.id === 'randomImageButton' ? "New Picture" : "Back To Ready"; setButtonLoading(button, originalText, true); imageElement.classList.add('image-loading'); imageElement.src = newPath;
+        }
+        
+        randomButton.addEventListener('click', function () {
+            if (randomButton.classList.contains('loading')) return;
+            // Stop the effect before loading the new image
+            stopBlinders();
+            randomButton.classList.add('loading'); textOverlay.classList.add('show-text');
+            setTimeout(() => {
+                textOverlay.classList.remove('show-text');
+                randomButton.classList.remove('loading');
+                let newIndex;
+                do { newIndex = Math.floor(Math.random() * TOTAL_IMAGES) + 1; } while (newIndex === currentImageIndex);
+                currentImageIndex = newIndex;
+                const newImagePath = `images/${currentImageIndex}.png`;
+                specialButton.textContent = "Back To Ready";
+                changeImage(newImagePath, randomButton);
+            }, 1000);
+        });
+        
+        specialButton.addEventListener('click', function () {
+            if (currentImageIndex === 0) return;
+            currentImageIndex = 0;
+            randomButton.textContent = "New Picture";
+            // Stop the effect when returning to the ready screen
+            stopBlinders();
+            changeImage(SPECIAL_IMAGE_PATH, specialButton);
+        });
+        
+        randomButton.textContent = "New Picture"; specialButton.textContent = "Back To Ready";
     </script>
+
+    <!-- Dice and Card Scripts (Unchanged) -->
     <script>
         const diceWrapper = document.getElementById('diceWrapper'); const dice = document.getElementById('dice'); let spinCount = 0; const rotations = [ {x: 0,   y: 0}, {x: -90, y: 0}, {x: 0,   y: -90}, {x: 0,   y: 90}, {x: 90,  y: 0}, {x: 180, y: 0} ]; let diceBag = []; function createShuffledBag() { const initialBag = [0, 1, 2, 3, 4, 5]; for (let i = initialBag.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [initialBag[i], initialBag[j]] = [initialBag[j], initialBag[i]]; } return initialBag; } diceBag = createShuffledBag(); diceWrapper.addEventListener('click', () => { if (diceBag.length === 0) { diceBag = createShuffledBag(); } const faceIndex = diceBag.pop(); const targetRot = rotations[faceIndex]; spinCount += 3; const spinAngle = spinCount * 360; const finalX = spinAngle + targetRot.x; const finalY = spinAngle + targetRot.y; dice.style.transform = `rotateX(${finalX}deg) rotateY(${finalY}deg)`; });
     </script>
