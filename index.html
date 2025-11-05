@@ -5,19 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hidden Picture Challenge</title>
     <style>
-        /* --- Basic Styles --- */
+        /* --- All CSS is unchanged --- */
         h1{font-family:'Comic Sans MS',sans-serif;font-size:2.5em;text-align:center;margin-top:20px;margin-bottom: 20px; text-shadow:1px 1px 3px rgba(0,0,0,0.3);}
         h1:hover{transform:scale(1.1);transition:transform .3s ease;}
         body{font-family:Arial,sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;margin:0;background:#f4f4f9 url('images/background.png') center/cover no-repeat;}
         #game-area {display: flex; align-items: center; gap: 30px; margin-bottom: 20px;}
-
-        /* --- Controls Panel Styles --- */
         #controls-container {display: flex; flex-direction: column; gap: 20px; padding: 20px 15px; background-color: rgba(255, 255, 255, 0.7); border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);}
         .control-group {display: flex; flex-direction: column; align-items: center;}
         .control-group label {font-weight: bold; margin-bottom: 5px; font-family: Arial, sans-serif;}
         .control-group input[type="range"] {width: 150px;}
-
-        /* --- Unchanged Styles --- */
         #main-row{display:flex;align-items:center;gap:30px;}
         #button-group{display:flex;gap:15px;}
         .action-button{padding:12px 25px;font-size:18px;cursor:pointer;border:none;border-radius:5px;transition:background-color .3s ease;}
@@ -42,7 +38,6 @@
 </head>
 <body>
     <h1>Hidden Picture Challenge</h1>
-
     <div id="game-area">
         <div id="controls-container">
             <div class="control-group">
@@ -62,85 +57,23 @@
             <div class="card-container" id="chanceCard"> <div class="card"> <div class="card-face card-back">?</div> <div class="card-face card-front" id="cardValue"></div> </div> </div>
         </div>
     </div>
-
     <div id="button-group">
         <button id="randomImageButton" class="action-button">New Picture</button>
         <button id="specialImageButton" class="action-button">Back To Ready</button>
     </div>
     <div id="text-overlay">NEW IMAGE</div>
 
-    <!-- UPDATED Spotlight Script -->
+    <!-- Spotlight Script (Unchanged) -->
     <script>
-        const imageToMask = document.getElementById('myImage');
-        const dotCountSlider = document.getElementById('dotCountSlider');
-        const speedSlider = document.getElementById('speedSlider');
-        const dotCountValue = document.getElementById('dotCountValue');
-        const speedValue = document.getElementById('speedValue');
-
-        const spotlightSettings = {
-            count: parseInt(dotCountSlider.value),
-            speed: parseFloat(speedSlider.value)
-        };
-        
+        const imageToMask = document.getElementById('myImage'); const dotCountSlider = document.getElementById('dotCountSlider'); const speedSlider = document.getElementById('speedSlider'); const dotCountValue = document.getElementById('dotCountValue'); const speedValue = document.getElementById('speedValue');
+        const spotlightSettings = { count: parseInt(dotCountSlider.value), speed: parseFloat(speedSlider.value) };
         let spotlightInterval = null;
-
-        function applySpeedTransition() {
-            const transitionValue = `mask-position ${spotlightSettings.speed}s ease-in-out, -webkit-mask-position ${spotlightSettings.speed}s ease-in-out`;
-            imageToMask.style.transition = transitionValue;
-        }
-
-        function moveSpotlights() {
-            const containerSize = 400; const spotlightRadius = 25; const minPosition = spotlightRadius; const maxPosition = containerSize - spotlightRadius; const movementRange = maxPosition - minPosition;
-            let positions = [];
-            for (let i = 0; i < spotlightSettings.count; i++) {
-                const randomX = Math.random() * movementRange + minPosition; const randomY = Math.random() * movementRange + minPosition; const maskX = randomX - spotlightRadius; const maskY = randomY - spotlightRadius; positions.push(`${maskX}px ${maskY}px`);
-            }
-            const positionsString = positions.join(', ');
-            imageToMask.style.maskPosition = positionsString;
-            imageToMask.style.webkitMaskPosition = positionsString;
-        }
-
-        function startSpotlight() {
-            if (spotlightInterval) clearInterval(spotlightInterval);
-
-            const singleGradient = `radial-gradient(circle 50px, black 100%, transparent 100%)`; const singleSize = `50px 50px`;
-            const gradients = Array(spotlightSettings.count).fill(singleGradient).join(', '); const sizes = Array(spotlightSettings.count).fill(singleSize).join(', ');
-
-            imageToMask.style.maskImage = gradients; imageToMask.style.webkitMaskImage = gradients; imageToMask.style.maskSize = sizes; imageToMask.style.webkitMaskSize = sizes;
-            
-            applySpeedTransition();
-            imageToMask.classList.remove('hidden-effect');
-            
-            setTimeout(moveSpotlights, 10);
-            const intervalTime = spotlightSettings.speed * 1000 + 500;
-            spotlightInterval = setInterval(moveSpotlights, intervalTime);
-        }
-
-        function stopSpotlight() {
-            // This now provides a more aggressive and complete cleanup.
-            imageToMask.classList.add('hidden-effect');
-            if (spotlightInterval) clearInterval(spotlightInterval);
-            // Explicitly remove the mask properties to ensure a clean slate.
-            imageToMask.style.maskImage = '';
-            imageToMask.style.webkitMaskImage = '';
-            imageToMask.style.maskSize = '';
-            imageToMask.style.webkitMaskSize = '';
-            imageToMask.style.maskPosition = '';
-            imageToMask.style.webkitMaskPosition = '';
-        }
-
-        // --- Event Listeners for Controls ---
-        dotCountSlider.addEventListener('input', () => {
-            spotlightSettings.count = parseInt(dotCountSlider.value);
-            dotCountValue.textContent = spotlightSettings.count;
-            if (!imageToMask.classList.contains('hidden-effect')) { startSpotlight(); }
-        });
-
-        speedSlider.addEventListener('input', () => {
-            spotlightSettings.speed = parseFloat(speedSlider.value);
-            speedValue.textContent = `${spotlightSettings.speed.toFixed(1)}s`;
-            if (!imageToMask.classList.contains('hidden-effect')) { startSpotlight(); }
-        });
+        function applySpeedTransition() { const transitionValue = `mask-position ${spotlightSettings.speed}s ease-in-out, -webkit-mask-position ${spotlightSettings.speed}s ease-in-out`; imageToMask.style.transition = transitionValue; }
+        function moveSpotlights() { const containerSize = 400; const spotlightRadius = 25; const minPosition = spotlightRadius; const maxPosition = containerSize - spotlightRadius; const movementRange = maxPosition - minPosition; let positions = []; for (let i = 0; i < spotlightSettings.count; i++) { const randomX = Math.random() * movementRange + minPosition; const randomY = Math.random() * movementRange + minPosition; const maskX = randomX - spotlightRadius; const maskY = randomY - spotlightRadius; positions.push(`${maskX}px ${maskY}px`); } const positionsString = positions.join(', '); imageToMask.style.maskPosition = positionsString; imageToMask.style.webkitMaskPosition = positionsString; }
+        function startSpotlight() { if (spotlightInterval) clearInterval(spotlightInterval); const singleGradient = `radial-gradient(circle 50px, black 100%, transparent 100%)`; const singleSize = `50px 50px`; const gradients = Array(spotlightSettings.count).fill(singleGradient).join(', '); const sizes = Array(spotlightSettings.count).fill(singleSize).join(', '); imageToMask.style.maskImage = gradients; imageToMask.style.webkitMaskImage = gradients; imageToMask.style.maskSize = sizes; imageToMask.style.webkitMaskSize = sizes; applySpeedTransition(); imageToMask.classList.remove('hidden-effect'); setTimeout(moveSpotlights, 10); const intervalTime = spotlightSettings.speed * 1000 + 500; spotlightInterval = setInterval(moveSpotlights, intervalTime); }
+        function stopSpotlight() { imageToMask.classList.add('hidden-effect'); if (spotlightInterval) clearInterval(spotlightInterval); imageToMask.style.maskImage = ''; imageToMask.style.webkitMaskImage = ''; imageToMask.style.maskSize = ''; imageToMask.style.webkitMaskSize = ''; imageToMask.style.maskPosition = ''; imageToMask.style.webkitMaskPosition = ''; }
+        dotCountSlider.addEventListener('input', () => { spotlightSettings.count = parseInt(dotCountSlider.value); dotCountValue.textContent = spotlightSettings.count; if (!imageToMask.classList.contains('hidden-effect')) { startSpotlight(); } });
+        speedSlider.addEventListener('input', () => { spotlightSettings.speed = parseFloat(speedSlider.value); speedValue.textContent = `${spotlightSettings.speed.toFixed(1)}s`; if (!imageToMask.classList.contains('hidden-effect')) { startSpotlight(); } });
     </script>
 
     <!-- Flashcard Script (Unchanged) -->
@@ -157,16 +90,53 @@
         stopSpotlight();
     </script>
 
-    <!-- Dice and Card Scripts (Unchanged) -->
+    <!-- Dice Script (Unchanged) -->
     <script>
         const diceWrapper = document.getElementById('diceWrapper'); const dice = document.getElementById('dice'); let spinCount = 0; const rotations = [ {x: 0,   y: 0}, {x: -90, y: 0}, {x: 0,   y: -90}, {x: 0,   y: 90}, {x: 90,  y: 0}, {x: 180, y: 0} ]; let diceBag = [];
         function createShuffledDiceBag() { const singleSet = [0, 1, 2, 3, 4, 5]; const initialBag = [...singleSet, ...singleSet, ...singleSet]; for (let i = initialBag.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [initialBag[i], initialBag[j]] = [initialBag[j], initialBag[i]]; } return initialBag; }
         diceBag = createShuffledDiceBag();
         diceWrapper.addEventListener('click', () => { if (diceBag.length === 0) { diceBag = createShuffledDiceBag(); } const faceIndex = diceBag.pop(); const targetRot = rotations[faceIndex]; spinCount += 3; const spinAngle = spinCount * 360; const finalX = spinAngle + targetRot.x; const finalY = spinAngle + targetRot.y; dice.style.transform = `rotateX(${finalX}deg) rotateY(${finalY}deg)`; });
     </script>
+    
+    <!-- UPDATED Chance Card Script -->
     <script>
-        const chanceCard = document.getElementById('chanceCard'); const cardInner = chanceCard.querySelector('.card'); const cardValue = document.getElementById('cardValue'); const cardOptions = ['x2', 'x3', '+10', '+5', '÷5', '-10', '-20'];
-        chanceCard.addEventListener('click', () => { if (cardInner.classList.contains('flipped')) { cardInner.classList.remove('flipped'); } else { const randomIndex = Math.floor(Math.random() * cardOptions.length); const randomValue = cardOptions[randomIndex]; cardValue.textContent = randomValue; cardInner.classList.add('flipped'); } });
+        const chanceCard = document.getElementById('chanceCard');
+        const cardInner = chanceCard.querySelector('.card');
+        const cardValue = document.getElementById('cardValue');
+        
+        // UPDATED: Card options array
+        const cardOptions = ['x2', 'x3', '+10', '+15', '÷5', '-10', '-20'];
+        
+        // NEW: Shuffle Bag logic for the chance card
+        let cardBag = [];
+        function createShuffledCardBag() {
+            const singleSet = Array.from({ length: cardOptions.length }, (_, i) => i);
+            const initialBag = [...singleSet, ...singleSet, ...singleSet]; // 3 sets of cards
+            
+            // Fisher-Yates shuffle
+            for (let i = initialBag.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [initialBag[i], initialBag[j]] = [initialBag[j], initialBag[i]];
+            }
+            return initialBag;
+        }
+        cardBag = createShuffledCardBag();
+
+        chanceCard.addEventListener('click', () => {
+            if (cardInner.classList.contains('flipped')) {
+                cardInner.classList.remove('flipped');
+            } else {
+                // UPDATED: Draw from the shuffle bag
+                if (cardBag.length === 0) {
+                    cardBag = createShuffledCardBag(); // Reshuffle if empty
+                }
+                const cardIndex = cardBag.pop(); // Get the next card index
+                const randomValue = cardOptions[cardIndex];
+                
+                cardValue.textContent = randomValue;
+                cardInner.classList.add('flipped');
+            }
+        });
     </script>
 </body>
 </html>
