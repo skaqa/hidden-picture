@@ -20,7 +20,7 @@
         #text-overlay{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:1000;font-family:'Comic Sans MS',sans-serif;font-size:3em;font-weight:bold;color:#fff;background:rgba(0,0,0,.8);padding:20px 40px;border-radius:10px;opacity:0;transition:opacity .3s ease-in-out;pointer-events:none;text-shadow:2px 2px 4px rgba(0,0,0,.5);}
         .show-text{opacity:1 !important;}
 
-        /* --- UPDATED: Spotlight Effect Styles --- */
+        /* --- REBUILT: Spotlight Effect Styles --- */
         #image-container {
             position: relative;
             width: 400px;
@@ -30,32 +30,35 @@
             overflow: hidden;
             box-shadow: 0 4px 12px rgba(0,0,0,.2);
             cursor: default;
+            /* Added for a cleaner look in some browsers */
+            background-color: black;
         }
         #myImage {
             width: 100%;
             height: 100%;
             object-fit: cover;
             display: block;
-        }
-        /* The blackout layer */
-        #spotlight-overlay {
-            position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background-color: black;
-            pointer-events: none;
             
-            /* The "hole" is a 25px radius (50px diameter) circle */
-            clip-path: circle(25px at 50% 50%);
+            /* The MAGIC is now here: We apply the mask directly to the image */
+            mask-image: radial-gradient(circle 25px at 50% 50%, black 100%, transparent 100%);
+            -webkit-mask-image: radial-gradient(circle 25px at 50% 50%, black 100%, transparent 100%);
+            
+            mask-repeat: no-repeat;
+            -webkit-mask-repeat: no-repeat;
+            
+            /* Animate the mask's position for the spotlight movement */
+            mask-position: 175px 175px; /* Start in the center */
+            -webkit-mask-position: 175px 175px;
+            
+            transition: -webkit-mask-position 2s ease-in-out, opacity 0.3s ease-in-out;
+            transition: mask-position 2s ease-in-out, opacity 0.3s ease-in-out;
+        }
+        /* When the effect is hidden, we make the mask cover the whole image */
+        #myImage.hidden-effect {
+             -webkit-mask-image: none;
+             mask-image: none;
+        }
 
-            /* The movement of the hole is smooth */
-            transition: clip-path 2s ease-in-out, opacity 0.3s ease-in-out;
-            opacity: 1;
-        }
-        /* Style for hiding the overlay completely */
-        #spotlight-overlay.hidden {
-            opacity: 0;
-        }
 
         /* --- Dice and Card Styles (Unchanged) --- */
         .dice-wrapper{perspective:800px;cursor:pointer;}
@@ -70,10 +73,9 @@
 <body>
     <h1>Hidden Picture Challenge</h1>
     <div id="main-row">
+        <!-- HTML is simplified. No overlay div is needed anymore. -->
         <div id="image-container">
-            <img id="myImage" src="images/0.png" alt="Hidden Picture Challenge">
-            <!-- The new overlay element -->
-            <div id="spotlight-overlay" class="hidden"></div>
+            <img id="myImage" src="images/0.png" alt="Hidden Picture Challenge" class="hidden-effect">
         </div>
 
         <!-- Dice and Card (Unchanged) -->
@@ -86,44 +88,52 @@
     </div>
     <div id="text-overlay">NEW IMAGE</div>
 
-    <!-- UPDATED Spotlight Script -->
+    <!-- REBUILT Spotlight Script -->
     <script>
-        const spotlightOverlay = document.getElementById('spotlight-overlay');
+        const imageToMask = document.getElementById('myImage');
         let spotlightInterval = null;
 
         function moveSpotlight() {
             const containerSize = 400;
-            const spotlightRadius = 25; // Half of the 50px diameter
-
-            // The range of movement for the circle's CENTER POINT
+            const spotlightRadius = 25;
             const minPosition = spotlightRadius;
             const maxPosition = containerSize - spotlightRadius;
             const movementRange = maxPosition - minPosition;
 
+            // Calculate center of the spotlight
             const randomX = Math.random() * movementRange + minPosition;
             const randomY = Math.random() * movementRange + minPosition;
 
-            spotlightOverlay.style.clipPath = `circle(25px at ${randomX}px ${randomY}px)`;
+            // The mask's position is its top-left corner, so we adjust by the radius
+            const maskX = randomX - spotlightRadius;
+            const maskY = randomY - spotlightRadius;
+
+            imageToMask.style.maskPosition = `${maskX}px ${maskY}px`;
+            imageToMask.style.webkitMaskPosition = `${maskX}px ${maskY}px`;
         }
 
         function startSpotlight() {
             if (spotlightInterval) clearInterval(spotlightInterval);
-            spotlightOverlay.classList.remove('hidden');
+            imageToMask.classList.remove('hidden-effect');
             
-            setTimeout(moveSpotlight, 10); // Move to first position
-            spotlightInterval = setInterval(moveSpotlight, 2500); // Move every 2.5 seconds
+            setTimeout(moveSpotlight, 10);
+            spotlightInterval = setInterval(moveSpotlight, 2500);
         }
 
         function stopSpotlight() {
-            spotlightOverlay.classList.add('hidden');
+            imageToMask.classList.add('hidden-effect');
             if (spotlightInterval) clearInterval(spotlightInterval);
         }
     </script>
 
-    <!-- UPDATED Flashcard Script -->
+    <!-- UPDATED Flashcard Script (to control the new effect) -->
     <script>
         const imageElement = document.getElementById('myImage'); const randomButton = document.getElementById('randomImageButton'); const specialButton = document.getElementById('specialImageButton'); const textOverlay = document.getElementById('text-overlay'); const TOTAL_IMAGES = 8; let currentImageIndex = 0; const SPECIAL_IMAGE_PATH = 'images/0.png';
         
+        let imageBag = [];
+        function createShuffledImageBag() { const initialBag = Array.from({ length: TOTAL_IMAGES }, (_, i) => i + 1); for (let i = initialBag.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [initialBag[i], initialBag[j]] = [initialBag[j], initialBag[i]]; } return initialBag; }
+        imageBag = createShuffledImageBag();
+
         function setButtonLoading(button, originalText, isLoading) { if (isLoading) { button.classList.add('loading'); button.textContent = 'Loading...'; } else { button.classList.remove('loading'); button.textContent = originalText; } }
         
         imageElement.addEventListener('load', function () {
@@ -143,11 +153,12 @@
             setButtonLoading(randomButton, "New Picture", true);
             
             textOverlay.classList.add('show-text');
-            startSpotlight(); // Start effect *before* changing the image
+            startSpotlight();
             
             setTimeout(() => {
-                let newIndex;
-                do { newIndex = Math.floor(Math.random() * TOTAL_IMAGES) + 1; } while (newIndex === currentImageIndex);
+                if (imageBag.length === 0) { imageBag = createShuffledImageBag(); }
+                const newIndex = imageBag.pop();
+                
                 currentImageIndex = newIndex;
                 const newImagePath = `images/${currentImageIndex}.png`;
                 changeImage(newImagePath);
@@ -159,11 +170,10 @@
             setButtonLoading(specialButton, "Back To Ready", true);
             currentImageIndex = 0;
             
-            stopSpotlight(); // Stop effect when returning to ready
+            stopSpotlight();
             changeImage(SPECIAL_IMAGE_PATH);
         });
         
-        // Ensure the effect is off when the page loads
         stopSpotlight();
     </script>
 
@@ -172,7 +182,7 @@
         const diceWrapper = document.getElementById('diceWrapper'); const dice = document.getElementById('dice'); let spinCount = 0; const rotations = [ {x: 0,   y: 0}, {x: -90, y: 0}, {x: 0,   y: -90}, {x: 0,   y: 90}, {x: 90,  y: 0}, {x: 180, y: 0} ]; let diceBag = []; function createShuffledBag() { const initialBag = [0, 1, 2, 3, 4, 5]; for (let i = initialBag.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [initialBag[i], initialBag[j]] = [initialBag[j], initialBag[i]]; } return initialBag; } diceBag = createShuffledBag(); diceWrapper.addEventListener('click', () => { if (diceBag.length === 0) { diceBag = createShuffledBag(); } const faceIndex = diceBag.pop(); const targetRot = rotations[faceIndex]; spinCount += 3; const spinAngle = spinCount * 360; const finalX = spinAngle + targetRot.x; const finalY = spinAngle + targetRot.y; dice.style.transform = `rotateX(${finalX}deg) rotateY(${finalY}deg)`; });
     </script>
     <script>
-        const chanceCard = document.getElementById('chanceCard'); const cardInner = chanceCard.querySelector('.card'); const cardValue = document.getElementById('cardValue'); const cardOptions = ['x2', 'x3', '+10', '+5', '/5', '-10', '-20']; chanceCard.addEventListener('click', () => { if (cardInner.classList.contains('flipped')) { cardInner.classList.remove('flipped'); } else { const randomIndex = Math.floor(Math.random() * cardOptions.length); const randomValue = cardOptions[randomIndex]; cardValue.textContent = randomValue; cardInner.classList.add('flipped'); } });
+        const chanceCard = document.getElementById('chanceCard'); const cardInner = chanceCard.querySelector('.card'); const cardValue = document.getElementById('cardValue'); const cardOptions = ['x2', 'x3', '+10', '+5', '/5', '-10', '-20']; chanceCard.addEventListener('click', () => { if (cardInner.classList.contains('flipped')) { cardInner.classList.remove('flipped'); } else { const randomIndex = Math.floor(Math.random() * cardOptions.length); const randomValue = cardOptions[randomIndex]; cardInner.classList.add('flipped'); } });
     </script>
 </body>
 </html>
