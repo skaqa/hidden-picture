@@ -22,14 +22,15 @@
 
         /* --- UPDATED: Hidden Picture Styles --- */
         #image-container {
-            position: relative; /* Crucial for positioning the overlay */
+            position: relative;
             width: 400px;
             height: 400px;
             border: 5px solid #ccc;
             border-radius: 8px;
-            overflow: hidden; /* This is very important for clip-path to work neatly */
+            overflow: hidden;
             box-shadow: 0 4px 12px rgba(0,0,0,.2);
-            cursor: crosshair; /* Change cursor to indicate an interactive area */
+            /* Cursor is normal now, not interactive */
+            cursor: default;
         }
         #myImage {
             width: 100%;
@@ -37,22 +38,18 @@
             object-fit: cover;
             display: block;
         }
-        /* The NEW overlay that blacks out the image */
         #image-overlay {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.95); /* Very dark, but not 100% black */
-            
-            /* The magic: This "cuts a hole" in the overlay. JS will control the position. */
-            clip-path: circle(75px at 50% 50%); 
-            
-            /* Make the hole appear/disappear smoothly when the mouse enters/leaves */
-            transition: clip-path 0.1s ease;
+            background-color: rgba(0, 0, 0, 0.95);
+            /* The hole starts in the center */
+            clip-path: circle(75px at 50% 50%);
+            /* Make the movement between spots smooth and elegant */
+            transition: clip-path 1.5s ease-in-out;
         }
-
 
         /* --- Dice and Card Styles (Unchanged) --- */
         .dice-wrapper{perspective:800px;cursor:pointer;}
@@ -67,7 +64,6 @@
 <body>
     <h1>Hidden Picture Challenge</h1>
     <div id="main-row">
-        <!-- UPDATED HTML: Added the overlay div inside the container -->
         <div id="image-container">
             <img id="myImage" src="images/0.png" alt="Hidden Picture Challenge">
             <div id="image-overlay"></div>
@@ -83,24 +79,21 @@
     </div>
     <div id="text-overlay">NEW IMAGE</div>
 
-    <!-- NEW SCRIPT for the Spotlight Effect -->
+    <!-- NEW SCRIPT for the Automated Spotlight Effect -->
     <script>
-        const imageContainer = document.getElementById('image-container');
         const overlay = document.getElementById('image-overlay');
 
-        imageContainer.addEventListener('mousemove', (e) => {
-            // Get the position of the mouse relative to the container
-            const x = e.clientX - imageContainer.getBoundingClientRect().left;
-            const y = e.clientY - imageContainer.getBoundingClientRect().top;
+        function moveSpotlight() {
+            // Generate random positions (as percentages) to keep the spotlight on the image
+            const randomX = Math.floor(Math.random() * 80) + 10; // Random % between 10% and 90%
+            const randomY = Math.floor(Math.random() * 80) + 10; // Random % between 10% and 90%
 
-            // Update the clip-path property to move the "hole" to the mouse's position
-            overlay.style.clipPath = `circle(75px at ${x}px ${y}px)`;
-        });
+            // Update the clip-path to move the spotlight to the new random position
+            overlay.style.clipPath = `circle(75px at ${randomX}% ${randomY}%)`;
+        }
 
-        // When the mouse leaves the container, shrink the circle to hide it
-        imageContainer.addEventListener('mouseleave', () => {
-            overlay.style.clipPath = 'circle(0px at 50% 50%)';
-        });
+        // Call the function every 2.5 seconds to move the spotlight to a new area
+        setInterval(moveSpotlight, 2500);
     </script>
 
     <!-- Other Scripts (Unchanged) -->
