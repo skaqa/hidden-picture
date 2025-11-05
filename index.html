@@ -125,7 +125,8 @@
         specialButton.textContent = "Back To Ready";
     </script>
 
-    <!-- DICE ROLL JS (CORRECTED) -->
+    
+<!-- ---------- DICE ROLL JS (WITH DEBUGGING) ---------- -->
     <script>
         const diceWrapper = document.getElementById('diceWrapper');
         const dice = document.getElementById('dice');
@@ -144,12 +145,14 @@
         let diceBag = [];
 
         function createShuffledBag() {
+            console.log("%c--- Creating and Shuffling a New Bag! ---", "color: blue; font-weight: bold;");
             const initialBag = [0, 1, 2, 3, 4, 5];
             // Fisher-Yates shuffle algorithm
             for (let i = initialBag.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [initialBag[i], initialBag[j]] = [initialBag[j], initialBag[i]];
             }
+            console.log("New Shuffled Bag:", initialBag);
             return initialBag;
         }
 
@@ -159,11 +162,19 @@
         diceWrapper.addEventListener('click', () => {
             // If the bag is empty, create a new shuffled one
             if (diceBag.length === 0) {
+                console.log("Bag is empty. Time to reshuffle.");
                 diceBag = createShuffledBag();
             }
 
+            console.log("Bag before drawing:", diceBag);
+
             // Pull the next roll from the end of the bag
             const faceIndex = diceBag.pop();
+            
+            console.log(`Drawn Face Index: ${faceIndex} (which is a roll of ${faceIndex + 1})`);
+            console.log("Bag after drawing:", diceBag);
+            console.log("--------------------");
+
 
             // Animate the dice
             const targetRot = rotations[faceIndex];
@@ -174,6 +185,8 @@
             dice.style.transform = `rotateX(${currentRotationX}deg) rotateY(${currentRotationY}deg)`;
         });
     </script>
+
+  
     
     <!-- CHANCE CARD JS (unchanged) -->
     <script>
