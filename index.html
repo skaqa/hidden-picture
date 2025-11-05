@@ -67,26 +67,16 @@
         <div id="image-container">
             <img id="myImage" src="images/0.png" alt="Currently displayed image" decoding="async">
         </div>
-
-        <!-- Dice -->
         <div class="dice-wrapper" id="diceWrapper">
             <div class="dice" id="dice">
-                <!-- NEW: Correct mapping of faces to a standard die layout -->
-                <!-- 1 is on the front, 6 is on the back -->
                 <div class="dice-face front face-1"><div class="dot"></div></div>
                 <div class="dice-face back face-6"><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
-                
-                <!-- 2 is on the top, 5 is on the bottom -->
                 <div class="dice-face top face-2"><div class="dot"></div><div class="dot"></div></div>
                 <div class="dice-face bottom face-5"><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
-
-                <!-- 3 is on the right, 4 is on the left -->
                 <div class="dice-face right face-3"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
                 <div class="dice-face left face-4"><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
             </div>
         </div>
-
-        <!-- Chance Card -->
         <div class="card-container" id="chanceCard">
             <div class="card">
                 <div class="card-face card-back">?</div>
@@ -94,7 +84,6 @@
             </div>
         </div>
     </div>
-    
     <div id="button-group">
         <button id="randomImageButton" class="action-button">Show Random Image</button>
         <button id="specialImageButton" class="action-button">Back To Ready</button>
@@ -106,37 +95,32 @@
         const imageElement = document.getElementById('myImage'); const randomButton = document.getElementById('randomImageButton'); const specialButton = document.getElementById('specialImageButton'); const textOverlay = document.getElementById('text-overlay'); const TOTAL_IMAGES = 8; let currentImageIndex = 0; const SPECIAL_IMAGE_PATH = 'images/0.png'; function setButtonLoading(button, originalText, isLoading) { if (isLoading) { button.classList.add('loading'); button.textContent = 'Loading...'; } else { button.classList.remove('loading'); button.textContent = originalText; } } imageElement.addEventListener('load', function () { imageElement.classList.remove('image-loading'); if (randomButton.classList.contains('loading')) { setButtonLoading(randomButton, "Show Random Image", false); } else if (specialButton.classList.contains('loading')) { setButtonLoading(specialButton, "Back To Ready", false); } }); function changeImage(newPath, button) { if (button.classList.contains('loading')) return; const originalText = button.id === 'randomImageButton' ? "Show Random Image" : "Back To Ready"; setButtonLoading(button, originalText, true); imageElement.classList.add('image-loading'); imageElement.src = newPath; } randomButton.addEventListener('click', function () { if (randomButton.classList.contains('loading')) return; randomButton.classList.add('loading'); textOverlay.classList.add('show-text'); setTimeout(() => { textOverlay.classList.remove('show-text'); randomButton.classList.remove('loading'); let newIndex; do { newIndex = Math.floor(Math.random() * TOTAL_IMAGES) + 1; } while (newIndex === currentImageIndex); currentImageIndex = newIndex; const newImagePath = `images/${currentImageIndex}.png`; specialButton.textContent = "Back To Ready"; changeImage(newImagePath, randomButton); }, 1000); }); specialButton.addEventListener('click', function () { if (currentImageIndex === 0) return; currentImageIndex = 0; randomButton.textContent = "Show Random Image"; changeImage(SPECIAL_IMAGE_PATH, specialButton); }); randomButton.textContent = "Show Random Image"; specialButton.textContent = "Back To Ready";
     </script>
 
-    <!-- DICE ROLL JS (CORRECTED) -->
+    <!-- DICE ROLL JS (WITH CONSOLE LOGS FOR DEBUGGING) -->
     <script>
         const diceWrapper = document.getElementById('diceWrapper');
         const dice = document.getElementById('dice');
         let currentRotationX = 0;
         let currentRotationY = 0;
 
-        // NEW: Correct mapping of rolls to the physical rotations
         const rotations = [
-            // Index 0 (Roll a 1) -> shows .front face
-            {x: 0,   y: 0},
-            // Index 1 (Roll a 2) -> shows .top face
-            {x: -90, y: 0},
-            // Index 2 (Roll a 3) -> shows .right face
-            {x: 0,   y: -90},
-            // Index 3 (Roll a 4) -> shows .left face
-            {x: 0,   y: 90},
-            // Index 4 (Roll a 5) -> shows .bottom face
-            {x: 90,  y: 0},
-            // Index 5 (Roll a 6) -> shows .back face
-            {x: 180, y: 0}
+            {x: 0,   y: 0},   // Index 0 (Roll 1) -> shows .front face
+            {x: -90, y: 0},   // Index 1 (Roll 2) -> shows .top face
+            {x: 0,   y: -90},  // Index 2 (Roll 3) -> shows .right face
+            {x: 0,   y: 90},   // Index 3 (Roll 4) -> shows .left face
+            {x: 90,  y: 0},   // Index 4 (Roll 5) -> shows .bottom face
+            {x: 180, y: 0}    // Index 5 (Roll 6) -> shows .back face
         ];
 
         let diceBag = [];
 
         function createShuffledBag() {
-            const initialBag = [0, 1, 2, 3, 4, 5];
+            console.log("%c--- Creating and Shuffling a New Bag! ---", "color: blue; font-weight: bold;");
+            const initialBag = [0, 1, 2, 3, 4, 5]; // Indexes represent rolls 1-6
             for (let i = initialBag.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [initialBag[i], initialBag[j]] = [initialBag[j], initialBag[i]];
             }
+            console.log("New Shuffled Bag (indexes):", initialBag);
             return initialBag;
         }
 
@@ -144,9 +128,18 @@
 
         diceWrapper.addEventListener('click', () => {
             if (diceBag.length === 0) {
+                console.warn("Bag is empty. Reshuffling."); // Use warn for visibility
                 diceBag = createShuffledBag();
             }
-            const faceIndex = diceBag.pop();
+            
+            console.log("Current Bag:", diceBag);
+            const faceIndex = diceBag.pop(); // Get the next roll
+            
+            // This is the most important log: It tells you what the code *thinks* it's about to show.
+            console.log(`Drawn Index: ${faceIndex}. This should show a roll of: ${faceIndex + 1}`);
+            console.log("Bag after drawing:", diceBag);
+            console.log("--------------------");
+
             const targetRot = rotations[faceIndex];
             const spinX = 3 * 360;
             const spinY = 3 * 360;
