@@ -20,7 +20,7 @@
         #text-overlay{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:1000;font-family:'Comic Sans MS',sans-serif;font-size:3em;font-weight:bold;color:#fff;background:rgba(0,0,0,.8);padding:20px 40px;border-radius:10px;opacity:0;transition:opacity .3s ease-in-out;pointer-events:none;text-shadow:2px 2px 4px rgba(0,0,0,.5);}
         .show-text{opacity:1 !important;}
 
-        /* --- Hidden Picture Styles --- */
+        /* --- UPDATED: Spotlight Effect Styles --- */
         #image-container {
             position: relative;
             width: 400px;
@@ -37,24 +37,24 @@
             object-fit: cover;
             display: block;
         }
-        #blinder-container {
+        /* The blackout layer */
+        #spotlight-overlay {
             position: absolute;
             top: 0; left: 0;
             width: 100%; height: 100%;
-            pointer-events: none;
-            opacity: 1;
-            transition: opacity 0.3s ease-in-out;
-        }
-        #blinder-container.hidden {
-            opacity: 0;
-        }
-        .blinder-dot {
-            position: absolute;
             background-color: black;
-            width: 240px;
-            height: 240px;
-            border-radius: 50%;
-            transition: top 4s ease-in-out, left 4s ease-in-out;
+            pointer-events: none;
+            
+            /* The "hole" is a 25px radius (50px diameter) circle */
+            clip-path: circle(25px at 50% 50%);
+
+            /* The movement of the hole is smooth */
+            transition: clip-path 2s ease-in-out, opacity 0.3s ease-in-out;
+            opacity: 1;
+        }
+        /* Style for hiding the overlay completely */
+        #spotlight-overlay.hidden {
+            opacity: 0;
         }
 
         /* --- Dice and Card Styles (Unchanged) --- */
@@ -72,7 +72,8 @@
     <div id="main-row">
         <div id="image-container">
             <img id="myImage" src="images/0.png" alt="Hidden Picture Challenge">
-            <div id="blinder-container" class="hidden"></div>
+            <!-- The new overlay element -->
+            <div id="spotlight-overlay" class="hidden"></div>
         </div>
 
         <!-- Dice and Card (Unchanged) -->
@@ -85,56 +86,41 @@
     </div>
     <div id="text-overlay">NEW IMAGE</div>
 
-    <!-- UPDATED Blinder Dots Script -->
+    <!-- UPDATED Spotlight Script -->
     <script>
-        const blinderContainer = document.getElementById('blinder-container');
-        const DOT_COUNT = 15;
-        let blinderInterval = null;
+        const spotlightOverlay = document.getElementById('spotlight-overlay');
+        let spotlightInterval = null;
 
-        function moveBlinders() {
-            // UPDATED LOGIC to allow partial off-screen movement
+        function moveSpotlight() {
             const containerSize = 400;
-            const dotSize = 240;
+            const spotlightRadius = 25; // Half of the 50px diameter
 
-            // The total area the dot's top-left corner can be in.
-            // This is larger than the container to allow for off-screen positioning.
-            const movementRange = containerSize + dotSize;
+            // The range of movement for the circle's CENTER POINT
+            const minPosition = spotlightRadius;
+            const maxPosition = containerSize - spotlightRadius;
+            const movementRange = maxPosition - minPosition;
 
-            // The offset pushes the coordinate system so that (0,0) is off-screen.
-            const offset = -(dotSize / 2);
+            const randomX = Math.random() * movementRange + minPosition;
+            const randomY = Math.random() * movementRange + minPosition;
 
-            const dots = blinderContainer.children;
-            for (const dot of dots) {
-                const randomX = Math.random() * movementRange + offset;
-                const randomY = Math.random() * movementRange + offset;
-                dot.style.left = `${randomX}px`;
-                dot.style.top = `${randomY}px`;
-            }
+            spotlightOverlay.style.clipPath = `circle(25px at ${randomX}px ${randomY}px)`;
         }
 
-        function startBlinders() {
-            if (blinderInterval) clearInterval(blinderInterval);
-            blinderContainer.innerHTML = '';
+        function startSpotlight() {
+            if (spotlightInterval) clearInterval(spotlightInterval);
+            spotlightOverlay.classList.remove('hidden');
             
-            for (let i = 0; i < DOT_COUNT; i++) {
-                const dot = document.createElement('div');
-                dot.className = 'blinder-dot';
-                blinderContainer.appendChild(dot);
-            }
-            
-            blinderContainer.classList.remove('hidden');
-            
-            setTimeout(moveBlinders, 10);
-            blinderInterval = setInterval(moveBlinders, 4000);
+            setTimeout(moveSpotlight, 10); // Move to first position
+            spotlightInterval = setInterval(moveSpotlight, 2500); // Move every 2.5 seconds
         }
 
-        function stopBlinders() {
-            blinderContainer.classList.add('hidden');
-            if (blinderInterval) clearInterval(blinderInterval);
+        function stopSpotlight() {
+            spotlightOverlay.classList.add('hidden');
+            if (spotlightInterval) clearInterval(spotlightInterval);
         }
     </script>
 
-    <!-- UPDATED Flashcard Script (No functional change, just ensuring it works with the new logic) -->
+    <!-- UPDATED Flashcard Script -->
     <script>
         const imageElement = document.getElementById('myImage'); const randomButton = document.getElementById('randomImageButton'); const specialButton = document.getElementById('specialImageButton'); const textOverlay = document.getElementById('text-overlay'); const TOTAL_IMAGES = 8; let currentImageIndex = 0; const SPECIAL_IMAGE_PATH = 'images/0.png';
         
@@ -157,7 +143,7 @@
             setButtonLoading(randomButton, "New Picture", true);
             
             textOverlay.classList.add('show-text');
-            startBlinders(); // Start blinders *before* changing the image
+            startSpotlight(); // Start effect *before* changing the image
             
             setTimeout(() => {
                 let newIndex;
@@ -173,12 +159,12 @@
             setButtonLoading(specialButton, "Back To Ready", true);
             currentImageIndex = 0;
             
-            stopBlinders();
+            stopSpotlight(); // Stop effect when returning to ready
             changeImage(SPECIAL_IMAGE_PATH);
         });
         
-        // Initial state
-        stopBlinders();
+        // Ensure the effect is off when the page loads
+        stopSpotlight();
     </script>
 
     <!-- Dice and Card Scripts (Unchanged) -->
