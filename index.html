@@ -51,7 +51,6 @@
         .blinder-dot {
             position: absolute;
             background-color: black;
-            /* UPDATED: Dots are now twice as big */
             width: 240px;
             height: 240px;
             border-radius: 50%;
@@ -93,15 +92,21 @@
         let blinderInterval = null;
 
         function moveBlinders() {
-            // UPDATED: Logic to keep dots within the bounds
-            const containerSize = 400; // #image-container width
-            const dotSize = 240;       // .blinder-dot width
-            const maxPosition = containerSize - dotSize; // The furthest the top-left corner can go
+            // UPDATED LOGIC to allow partial off-screen movement
+            const containerSize = 400;
+            const dotSize = 240;
+
+            // The total area the dot's top-left corner can be in.
+            // This is larger than the container to allow for off-screen positioning.
+            const movementRange = containerSize + dotSize;
+
+            // The offset pushes the coordinate system so that (0,0) is off-screen.
+            const offset = -(dotSize / 2);
 
             const dots = blinderContainer.children;
             for (const dot of dots) {
-                const randomX = Math.random() * maxPosition;
-                const randomY = Math.random() * maxPosition;
+                const randomX = Math.random() * movementRange + offset;
+                const randomY = Math.random() * movementRange + offset;
                 dot.style.left = `${randomX}px`;
                 dot.style.top = `${randomY}px`;
             }
@@ -119,7 +124,7 @@
             
             blinderContainer.classList.remove('hidden');
             
-            setTimeout(moveBlinders, 10); // Move them immediately
+            setTimeout(moveBlinders, 10);
             blinderInterval = setInterval(moveBlinders, 2000);
         }
 
@@ -129,15 +134,13 @@
         }
     </script>
 
-    <!-- UPDATED Flashcard Script -->
+    <!-- UPDATED Flashcard Script (No functional change, just ensuring it works with the new logic) -->
     <script>
         const imageElement = document.getElementById('myImage'); const randomButton = document.getElementById('randomImageButton'); const specialButton = document.getElementById('specialImageButton'); const textOverlay = document.getElementById('text-overlay'); const TOTAL_IMAGES = 8; let currentImageIndex = 0; const SPECIAL_IMAGE_PATH = 'images/0.png';
         
         function setButtonLoading(button, originalText, isLoading) { if (isLoading) { button.classList.add('loading'); button.textContent = 'Loading...'; } else { button.classList.remove('loading'); button.textContent = originalText; } }
         
         imageElement.addEventListener('load', function () {
-            // When image is loaded, simply hide the loading indicators.
-            // The blinders are already running behind the overlay.
             textOverlay.classList.remove('show-text');
             imageElement.classList.remove('image-loading');
             if (randomButton.classList.contains('loading')) { setButtonLoading(randomButton, "New Picture", false); }
@@ -153,18 +156,16 @@
             if (randomButton.classList.contains('loading')) return;
             setButtonLoading(randomButton, "New Picture", true);
             
-            // UPDATED LOGIC: Show overlay and start blinders at the same time!
             textOverlay.classList.add('show-text');
-            startBlinders();
+            startBlinders(); // Start blinders *before* changing the image
             
-            // Wait a moment for the overlay to appear, then change the image
             setTimeout(() => {
                 let newIndex;
                 do { newIndex = Math.floor(Math.random() * TOTAL_IMAGES) + 1; } while (newIndex === currentImageIndex);
                 currentImageIndex = newIndex;
                 const newImagePath = `images/${currentImageIndex}.png`;
                 changeImage(newImagePath);
-            }, 500); // 500ms delay gives overlay time to fade in
+            }, 500);
         });
         
         specialButton.addEventListener('click', function () {
@@ -172,13 +173,12 @@
             setButtonLoading(specialButton, "Back To Ready", true);
             currentImageIndex = 0;
             
-            // Stop blinders when returning to the ready screen
             stopBlinders();
             changeImage(SPECIAL_IMAGE_PATH);
         });
         
-        randomButton.textContent = "New Picture";
-        specialButton.textContent = "Back To Ready";
+        // Initial state
+        stopBlinders();
     </script>
 
     <!-- Dice and Card Scripts (Unchanged) -->
